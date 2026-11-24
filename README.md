@@ -15,7 +15,7 @@ models, from any device over a private link, through an OpenAI-compatible API an
 ![Platforms](https://img.shields.io/badge/runs%20on-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux%20%C2%B7%20Docker%20%C2%B7%20Phone-555)
 [![License](https://img.shields.io/badge/license-MIT-555)](LICENSE)
 
-[**Download**](#install) · [Local models anywhere](#your-local-models-from-anywhere) · [Run it your way](#run-it-your-way) ·
+[**Website**](https://kumarroushan9234.github.io/Keirolake/) · [**Download**](#install) · [Local models anywhere](#your-local-models-from-anywhere) · [Run it your way](#run-it-your-way) ·
 [Features](#features) · [API and MCP](#a-data-layer-for-your-ai-and-apps) · [Security](#security) · [Docs](#documentation)
 
 ![A 50-second tour of KeiroLake](docs/media/demo.gif)

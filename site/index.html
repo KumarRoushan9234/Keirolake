@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeiroLake</title>
+<meta name="description" content="A private data lake and AI gateway on your own hardware. Tables, documents and offline libraries, answered by local models first, reachable from any device through an OpenAI-compatible API and MCP.">
+<meta property="og:title" content="KeiroLake">
+<meta property="og:description" content="Your data, your models, your hardware. A private data lake and AI gateway that runs on your own computer.">
+<meta property="og:image" content="https://kumarroushan9234.github.io/Keirolake/assets/og.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8fa; --surface: #ffffff; --sunken: #eef1f5; --line: #e2e6ec; --line-strong: #cfd6df;
+  --text: #0f1726; --muted: #556072; --faint: #7d8796;
+  --accent: #1d63ed; --accent-ink: #ffffff; --accent-soft: #e6eefe; --accent-text: #1450c8;
+  --ok: #1f8a57; --glow: rgba(29, 99, 237, .16);
+  --code-bg: #0d1320; --code-text: #d7deea; --code-dim: #7f8aa0; --code-key: #7fb0ff; --code-str: #9fd8a8;
+  --shadow: 0 1px 2px rgba(15, 23, 38, .04), 0 12px 32px rgba(15, 23, 38, .08);
+  --r: 12px; --r-lg: 20px;
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #080c14; --surface: #0f1522; --sunken: #0b111c; --line: #1c2536; --line-strong: #2a3550;
+    --text: #e8edf5; --muted: #9aa6b8; --faint: #6f7b8f;
+    --accent: #3b7bff; --accent-ink: #ffffff; --accent-soft: #13213d; --accent-text: #8db3ff;
+    --ok: #4cc58a; --glow: rgba(59, 123, 255, .22);
+    --code-bg: #060a12; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 16px 40px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #080c14; --surface: #0f1522; --sunken: #0b111c; --line: #1c2536; --line-strong: #2a3550;
+  --text: #e8edf5; --muted: #9aa6b8; --faint: #6f7b8f;
+  --accent: #3b7bff; --accent-ink: #ffffff; --accent-soft: #13213d; --accent-text: #8db3ff;
+  --ok: #4cc58a; --glow: rgba(59, 123, 255, .22);
+  --code-bg: #060a12; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 16px 40px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img, video { display: block; max-width: 100%; }
+a { color: inherit; }
+code, pre { font-family: var(--mono); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--surface); padding: 8px 12px; border-radius: 8px; z-index: 10; }
+.skip:focus { left: 16px; }
+
+/* Nav */
+.nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid transparent; transition: border-color .2s ease-out; }
+.nav.scrolled { border-bottom-color: var(--line); }
+.nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none; letter-spacing: -.01em; }
+.brand img { width: 28px; height: 28px; }
+.nav-links { display: flex; gap: 24px; margin-left: 16px; font-size: 14px; color: var(--muted); }
+.nav-links a { text-decoration: none; transition: color .15s ease-out; }
+.nav-links a:hover { color: var(--text); }
+.nav-end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--muted); cursor: pointer; text-decoration: none; transition: color .15s ease-out, border-color .15s ease-out; }
+.icon-btn:hover { color: var(--text); border-color: var(--line-strong); }
+svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 24px; border-radius: var(--r); font: 600 16px/1 var(--font); text-decoration: none; cursor: pointer; border: 1px solid transparent; transition: transform .15s ease-out, background-color .15s ease-out, border-color .15s ease-out; white-space: nowrap; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 8px 24px var(--glow); }
+.btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
+.btn-ghost { background: var(--surface); border-color: var(--line); color: var(--text); }
+.btn-ghost:hover { border-color: var(--line-strong); }
+.btn-sm { height: 40px; padding: 0 16px; font-size: 14px; border-radius: 10px; }
+
+/* Hero */
+.hero { position: relative; padding: 96px 0 64px; isolation: isolate; }
+.hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%); opacity: .7; }
+.hero::after { content: ""; position: absolute; left: 50%; top: 280px; width: min(1000px, 100%); height: 480px; transform: translateX(-50%); z-index: -1; background: radial-gradient(closest-side, var(--glow), transparent); pointer-events: none; }
+.hero-copy { max-width: 820px; margin: 0 auto; text-align: center; }
+.pill { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 14px; color: var(--muted); text-decoration: none; transition: border-color .15s ease-out; }
+.pill:hover { border-color: var(--line-strong); }
+.pill b { font-weight: 600; color: var(--accent-text); background: var(--accent-soft); border-radius: 999px; padding: 2px 8px; font-size: 12px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation: ping 2.4s ease-out infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 50%, transparent); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
+h1 { font-size: 72px; line-height: 1.04; letter-spacing: -.035em; font-weight: 700; margin: 24px 0 24px; }
+h1 .soft { color: var(--faint); }
+.lede { font-size: 20px; line-height: 1.5; color: var(--muted); max-width: 640px; margin: 0 auto 32px; }
+.cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.cta-note { margin-top: 16px; font-size: 14px; color: var(--faint); }
+.cta-note a { color: var(--muted); }
+
+.frame { margin: 64px auto 0; max-width: 1120px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow), 0 40px 120px -40px var(--glow); overflow: hidden; }
+.frame-bar { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--sunken); }
+.frame-bar i { width: 12px; height: 12px; border-radius: 50%; background: var(--line-strong); }
+.frame-bar span { margin-left: 12px; font: 12px var(--mono); color: var(--faint); }
+.frame video, .frame img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; background: var(--sunken); }
+
+/* Proof strip */
+.proof { padding: 48px 0 0; }
+.proof ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; font: 14px var(--mono); color: var(--muted); }
+.proof li { display: flex; align-items: center; gap: 8px; }
+.proof li svg { color: var(--accent); }
+
+/* Sections */
+section.block { padding: 128px 0; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-text); margin: 0 0 16px; }
+h2 { font-size: 48px; line-height: 1.1; letter-spacing: -.03em; margin: 0 0 16px; font-weight: 700; }
+h3 { font-size: 24px; line-height: 1.25; letter-spacing: -.015em; margin: 0 0 12px; font-weight: 600; }
+.sub { font-size: 20px; color: var(--muted); max-width: 640px; margin: 0; }
+.head { margin-bottom: 64px; }
+.head.center { text-align: center; }
+.head.center .sub { margin: 0 auto; }
+
+/* Flow diagram */
+.flow { display: grid; grid-template-columns: 1fr 96px 1fr 96px 1fr 96px 1fr; align-items: stretch; }
+.flow .wire { align-self: center; }
+.node { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 24px; box-shadow: var(--shadow); min-height: 176px; display: flex; flex-direction: column; gap: 12px; }
+.node .tag { font: 500 12px var(--mono); color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+.node strong { font-size: 16px; font-weight: 600; }
+.node p { margin: 0; font-size: 14px; color: var(--muted); }
+.node.core { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); box-shadow: var(--shadow), 0 0 0 4px var(--accent-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 12px var(--mono); padding: 4px 8px; border-radius: 6px; background: var(--sunken); border: 1px solid var(--line); color: var(--muted); }
+.wire { position: relative; height: 2px; background: repeating-linear-gradient(90deg, var(--line-strong) 0 6px, transparent 6px 12px); overflow: visible; }
+.wire::after { content: ""; position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: packet 2.2s cubic-bezier(.4, 0, .2, 1) infinite; }
+.wire:nth-of-type(4)::after { animation-delay: .7s; }
+.wire:nth-of-type(6)::after { animation-delay: 1.4s; }
+@keyframes packet { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(88px); opacity: 0; } }
+.flow-note { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: center; font-size: 14px; color: var(--muted); }
+.flow-note span { display: inline-flex; align-items: center; gap: 8px; }
+.flow-note svg { color: var(--ok); }
+
+/* Feature moments */
+.moment { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; align-items: center; padding: 64px 0; border-top: 1px solid var(--line); }
+.moment:first-of-type { border-top: 0; padding-top: 0; }
+.moment.flip { grid-template-columns: 7fr 5fr; }
+.moment.flip .copy { order: 2; }
+.moment .copy p { color: var(--muted); margin: 0 0 16px; font-size: 16px; }
+.moment ul { margin: 24px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; font-size: 14px; color: var(--muted); }
+.moment li { display: flex; gap: 12px; align-items: flex-start; }
+.moment li svg { color: var(--accent); margin-top: 2px; }
+.shot { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+.shot img { width: 100%; height: auto; }
+.phone-pair { display: flex; justify-content: center; gap: 24px; }
+.phone { width: min(280px, 46%); border: 8px solid #141b29; outline: 1px solid var(--line-strong); border-radius: 36px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+.phone img { width: 100%; height: auto; }
+.phone:nth-child(2) { margin-top: 48px; }
+
+/* Code */
+.code-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; align-items: start; }
+.steps { list-style: none; counter-reset: s; margin: 32px 0 0; padding: 0; display: grid; gap: 24px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 32px 1fr; gap: 16px; }
+.steps li::before { content: counter(s); width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font: 600 14px var(--mono); background: var(--accent-soft); color: var(--accent-text); }
+.steps strong { display: block; font-weight: 600; }
+.steps span { color: var(--muted); font-size: 14px; }
+.term { background: var(--code-bg); border-radius: var(--r); border: 1px solid #1b2436; overflow: hidden; box-shadow: var(--shadow); }
+.tabs { display: flex; align-items: center; gap: 4px; padding: 8px; border-bottom: 1px solid #1b2436; }
+.tab { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--code-dim); font: 500 12px var(--mono); cursor: pointer; transition: color .15s ease-out, background-color .15s ease-out; }
+.tab[aria-selected="true"] { background: #172036; color: #fff; }
+.tab:hover { color: #fff; }
+.copy-btn { margin-left: auto; height: 32px; padding: 0 12px; border: 1px solid #243049; border-radius: 8px; background: transparent; color: var(--code-dim); font: 500 12px var(--mono); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.copy-btn:hover { color: #fff; }
+pre { margin: 0; padding: 24px; overflow-x: auto; font-size: 14px; line-height: 1.7; color: var(--code-text); tab-size: 2; }
+pre .c { color: var(--code-dim); } pre .k { color: var(--code-key); } pre .s { color: var(--code-str); }
+
+/* Ways to run */
+.ways { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); overflow: hidden; }
+.way { padding: 24px; border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.way:first-child { border-left: 0; }
+.way svg { color: var(--accent); width: 24px; height: 24px; margin-bottom: 8px; }
+.way strong { font-weight: 600; }
+.way p { margin: 0; font-size: 14px; color: var(--muted); }
+.way code { margin-top: auto; padding-top: 12px; font-size: 12px; color: var(--faint); word-break: break-word; }
+
+/* Security */
+.sec { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.sec div { background: var(--surface); padding: 32px; }
+.sec strong { display: flex; align-items: center; gap: 12px; font-weight: 600; margin-bottom: 8px; }
+.sec strong svg { color: var(--accent); }
+.sec p { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* Download */
+.dl { position: relative; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: 64px; overflow: hidden; isolation: isolate; }
+.dl::before { content: ""; position: absolute; right: -160px; top: -160px; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(closest-side, var(--glow), transparent); z-index: -1; }
+.dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+.os { border: 1px solid var(--line); border-radius: var(--r); padding: 24px; background: var(--bg); display: flex; flex-direction: column; gap: 12px; }
+.os.mine { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 0 0 4px var(--accent-soft); }
+.os h3 { font-size: 20px; margin: 0; display: flex; align-items: center; justify-content: space-between; }
+.os h3 small { font: 500 12px var(--mono); color: var(--accent-text); }
+.os a.file { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); text-decoration: none; font-size: 14px; font-weight: 500; transition: border-color .15s ease-out, transform .15s ease-out; }
+.os a.file:hover { border-color: var(--accent); transform: translateY(-1px); }
+.os a.file span { font: 12px var(--mono); color: var(--faint); }
+.os p { margin: 0; font-size: 12px; color: var(--faint); }
+.os p code { font-size: 12px; }
+
+footer { padding: 64px 0; border-top: 1px solid var(--line); margin-top: 128px; font-size: 14px; color: var(--muted); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; }
+footer nav { display: flex; gap: 24px; margin-left: auto; flex-wrap: wrap; }
+footer a { text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+/* Motion */
+.rise { opacity: 0; transform: translateY(16px); animation: rise .7s cubic-bezier(.2, .7, .2, 1) forwards; }
+.d1 { animation-delay: .08s; } .d2 { animation-delay: .16s; } .d3 { animation-delay: .24s; } .d4 { animation-delay: .36s; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease-out, transform .6s cubic-bezier(.2, .7, .2, 1); }
+.reveal.in { opacity: 1; transform: none; }
+.no-js .reveal { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rise, .reveal { opacity: 1; transform: none; }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  h1 { font-size: 56px; }
+  .ways { grid-template-columns: repeat(2, 1fr); }
+  .way { border-left: 0; border-top: 1px solid var(--line); }
+  .way:nth-child(-n+2) { border-top: 0; }
+  .way:nth-child(even) { border-left: 1px solid var(--line); }
+  .way:last-child { grid-column: 1 / -1; border-left: 0; }
+  .flow { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  .node { min-height: 0; }
+  .wire { width: 2px; height: 48px; margin: 0 auto; background: repeating-linear-gradient(180deg, var(--line-strong) 0 6px, transparent 6px 12px); }
+  .wire::after { left: -3px; top: 0; animation-name: packet-y; }
+  @keyframes packet-y { 0% { transform: translateY(0); opacity: 0; } 15%, 85% { opacity: 1; } 100% { transform: translateY(40px); opacity: 0; } }
+}
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  section.block { padding: 96px 0; }
+  .moment, .moment.flip, .code-grid { grid-template-columns: 1fr; gap: 32px; }
+  .moment.flip .copy { order: 0; }
+  .sec { grid-template-columns: 1fr; }
+  .dl { padding: 32px 24px; }
+  .dl-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  .hero { padding: 64px 0 48px; }
+  h1 { font-size: 40px; }
+  h2 { font-size: 32px; }
+  .lede, .sub { font-size: 16px; }
+  section.block { padding: 64px 0; }
+  .head { margin-bottom: 48px; }
+  .frame { margin-top: 48px; border-radius: var(--r); }
+  .frame-bar span { display: none; }
+  .ways { grid-template-columns: 1fr; }
+  .way, .way:nth-child(even) { border-left: 0; border-top: 1px solid var(--line); }
+  .way:first-child { border-top: 0; }
+  .way:nth-child(2) { border-top: 1px solid var(--line); }
+  .nav .btn-sm { display: none; }
+  .phone { border-width: 6px; border-radius: 28px; }
+  .cta .btn { width: 100%; }
+  pre { font-size: 12px; padding: 16px; }
+  footer nav { margin-left: 0; }
+}
+</style>
+</head>
+<body class="no-js">
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 2 2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></symbol>
+  <symbol id="i-cloud-off" viewBox="0 0 24 24"><path d="M3 3l18 18M8 7a6 6 0 0 1 9.7 3.1A4 4 0 0 1 20 17M17 19H7a4 4 0 0 1-1.3-7.8"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-vault" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9V7m0 10v-2m3-3h2M7 12h2"/></symbol>
+  <symbol id="i-desktop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8m-4-4v4"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3m5 0h5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4m-4 5a8 8 0 0 0 14.9 3M20 20v-4h-4"/></symbol>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/icon-192.png" alt="" width="28" height="28">KeiroLake</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#anywhere">Anywhere</a>
+      <a href="#features">Features</a>
+      <a href="#api">API</a>
+      <a href="#security">Security</a>
+    </nav>
+    <div class="nav-end">
+      <button class="icon-btn" id="theme" type="button" aria-label="Switch to dark theme"><svg class="i"><use href="#i-moon"/></svg></button>
+      <a class="icon-btn" href="https://github.com/KumarRoushan9234/Keirolake" aria-label="KeiroLake on GitHub"><svg class="i"><use href="#i-github"/></svg></a>
+      <a class="btn btn-primary btn-sm" href="#download">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-copy">
+        <a class="pill rise" id="version-pill" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest"><span class="dot"></span><b id="version">Latest</b> Windows · macOS · Linux · Docker</a>
+        <h1 class="rise d1">Your data. Your models.<br><span class="soft">Your hardware.</span></h1>
+        <p class="lede rise d2">A private data lake and AI gateway. Tables, documents and offline Wikipedia in one place, answered by local models first, and reachable from any device.</p>
+        <div class="cta rise d3">
+          <a class="btn btn-primary" id="hero-dl" href="#download"><svg class="i"><use href="#i-download"/></svg><span>Download</span></a>
+          <a class="btn btn-ghost" href="https://github.com/KumarRoushan9234/Keirolake"><svg class="i"><use href="#i-github"/></svg>Source on GitHub</a>
+        </div>
+        <p class="cta-note rise d3" id="hero-note">Free and open source, MIT licensed.</p>
+      </div>
+      <div class="frame rise d4">
+        <div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span>KeiroLake · a 50-second tour</span></div>
+        <video id="demo" src="assets/demo.mp4" poster="assets/home.webp" muted loop playsinline preload="metadata" aria-label="A 50-second tour of KeiroLake: asking a question with sources, building a table by chatting, and sharing to a phone"></video>
+      </div>
+    </div>
+    <div class="proof">
+      <div class="wrap">
+        <ul>
+          <li><svg class="i"><use href="#i-check"/></svg>Works fully offline</li>
+          <li><svg class="i"><use href="#i-check"/></svg>OpenAI-compatible /v1</li>
+          <li><svg class="i"><use href="#i-check"/></svg>MCP server</li>
+          <li><svg class="i"><use href="#i-check"/></svg>No open ports</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Signed auto-updates</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="anywhere">
+    <div class="wrap">
+      <div class="head center reveal">
+        <p class="eyebrow">Local models, from anywhere</p>
+        <h2>Your GPU, on your phone.</h2>
+        <p class="sub">Run Ollama on the PC at home and use it from your phone, laptop or a cloud agent. Prompts and data never touch a third-party AI service.</p>
+      </div>
+      <div class="flow reveal" role="list" aria-label="How a request reaches your computer">
+        <div class="node" role="listitem">
+          <span class="tag">Any device</span>
+          <strong>Phone, laptop, agent</strong>
+          <p>Any OpenAI SDK or MCP client.</p>
+          <div class="chips"><span class="chip">HTTPS</span><span class="chip">API key</span></div>
+        </div>
+        <div class="wire" aria-hidden="true"></div>
+        <div class="node" role="listitem">
+          <span class="tag">Private link</span>
+          <strong>Cloudflare tunnel</strong>
+          <p>Connects outward from your PC. Nothing to open on the router.</p>
+          <div class="chips"><span class="chip">outbound only</span></div>
+        </div>
+        <div class="wire" aria-hidden="true"></div>
+        <div class="node core" role="listitem">
+          <span class="tag">Your computer</span>
+          <strong>KeiroLake gateway</strong>
+          <p>Checks the key, logs the call, picks the model.</p>
+          <div class="chips"><span class="chip">/v1</span><span class="chip">/mcp</span><span class="chip">tables API</span></div>
+        </div>
+        <div class="wire" aria-hidden="true"></div>
+        <div class="node" role="listitem">
+          <span class="tag">Answers</span>
+          <strong>Ollama and your lake</strong>
+          <p>A model on your GPU, or an answer grounded in your own data with sources.</p>
+          <div class="chips"><span class="chip">qwen2.5</span><span class="chip">model: lake</span></div>
+        </div>
+      </div>
+      <div class="flow-note reveal">
+        <span><svg class="i"><use href="#i-check"/></svg>Keeps answering with the screen locked</span>
+        <span><svg class="i"><use href="#i-check"/></svg>Optional: stay on with the lid closed</span>
+        <span><svg class="i"><use href="#i-check"/></svg>Or use your own domain</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="features" style="padding-top:0">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">What it does</p>
+        <h2>One lake for everything you know.</h2>
+        <p class="sub">Spreadsheets, PDFs, notes, web pages, public datasets and offline libraries, searchable together by meaning and keyword.</p>
+      </div>
+
+      <div class="moment reveal">
+        <div class="copy">
+          <h3>Ask, and see where the answer came from.</h3>
+          <p>Hybrid search over every collection, answered by a local model first. Every claim links to the passage it came from.</p>
+          <ul>
+            <li><svg class="i"><use href="#i-check"/></svg>Chat history grouped by day, with search</li>
+            <li><svg class="i"><use href="#i-check"/></svg>Falls back to the web only when you allow it</li>
+          </ul>
+        </div>
+        <div class="shot"><img src="assets/ask.webp" alt="The Ask page answering a question with numbered sources" width="1440" height="900" loading="lazy"></div>
+      </div>
+
+      <div class="moment flip reveal">
+        <div class="copy">
+          <h3>Build a dataset by talking.</h3>
+          <p>Describe a table or an offline library. Agree the columns, then the model fills the rows from your collections, offline libraries or the web, with a source and a confidence for each.</p>
+          <ul>
+            <li><svg class="i"><use href="#i-check"/></svg>Edit the plan by hand before anything is written</li>
+            <li><svg class="i"><use href="#i-check"/></svg>Keeps working when you leave the page</li>
+          </ul>
+        </div>
+        <div class="shot"><img src="assets/build-with-ai.webp" alt="Build with AI: a chat that designs an Indian states table and fills six rows" width="1440" height="900" loading="lazy"></div>
+      </div>
+
+      <div class="moment reveal">
+        <div class="copy">
+          <h3>Capture from your phone.</h3>
+          <p>Voice notes turned into text on your own computer, photos of pages read by a local vision model, and links saved as readable pages. Share from any Android app.</p>
+          <ul>
+            <li><svg class="i"><use href="#i-check"/></svg>No signal? Captures wait on the phone and send later</li>
+            <li><svg class="i"><use href="#i-check"/></svg>Installs as an app from the browser</li>
+          </ul>
+        </div>
+        <div class="phone-pair">
+          <div class="phone"><img src="assets/capture-phone.webp" alt="The Capture page on a phone: voice note, photo of a page, and a text box" width="780" height="1688" loading="lazy"></div>
+          <div class="phone"><img src="assets/mobile-home.webp" alt="Sharing settings on a phone" width="780" height="1688" loading="lazy"></div>
+        </div>
+      </div>
+
+      <div class="moment flip reveal">
+        <div class="copy">
+          <h3>Tables with history and sources.</h3>
+          <p>Every table is real SQL with cell-level sources and a full change history. Save views, ask questions in plain words, export to Excel or PDF.</p>
+          <ul>
+            <li><svg class="i"><use href="#i-check"/></svg>Ten free open-data sources and scrapers built in</li>
+            <li><svg class="i"><use href="#i-check"/></svg>Read-only SQL, generated or written by hand</li>
+          </ul>
+        </div>
+        <div class="shot"><img src="assets/tables.webp" alt="A table of world countries with filters and a saved view" width="1440" height="900" loading="lazy"></div>
+      </div>
+
+      <div class="moment reveal">
+        <div class="copy">
+          <h3>Models, quantized and unrestricted.</h3>
+          <p>Pull Ollama models, run quantized GGUF files directly, or use Heretic to remove a model's refusals and import the result, all from the app.</p>
+          <ul>
+            <li><svg class="i"><use href="#i-check"/></svg>Cloud models only within a daily limit you set</li>
+            <li><svg class="i"><use href="#i-check"/></svg>Zero data retention asked on every web request</li>
+          </ul>
+        </div>
+        <div class="shot"><img src="assets/models.webp" alt="The Models page listing local Ollama models" width="1440" height="900" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="api" style="padding-top:0">
+    <div class="wrap code-grid">
+      <div class="reveal">
+        <p class="eyebrow">For your apps and agents</p>
+        <h2>A data layer with an API you already know.</h2>
+        <p class="sub">Point any OpenAI SDK, script or MCP client at your lake.</p>
+        <ol class="steps">
+          <li><div><strong>Turn on the link</strong><span>Serve → Sharing → Anywhere, or <code>keirolake serve --share internet</code></span></div></li>
+          <li><div><strong>Make a key</strong><span>Only the permissions it needs: read, ask, write, sql, llm</span></div></li>
+          <li><div><strong>Call it from anywhere</strong><span>Every call is limited, logged and revocable</span></div></li>
+        </ol>
+      </div>
+      <div class="term reveal">
+        <div class="tabs" role="tablist" aria-label="Examples">
+          <button class="tab" role="tab" aria-selected="true" aria-controls="p-py" id="t-py">Python</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="p-curl" id="t-curl" tabindex="-1">curl</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="p-mcp" id="t-mcp" tabindex="-1">MCP</button>
+          <button class="copy-btn" type="button" id="copy"><svg class="i"><use href="#i-copy"/></svg><span>Copy</span></button>
+        </div>
+<pre role="tabpanel" id="p-py" aria-labelledby="t-py" tabindex="0"><span class="k">from</span> openai <span class="k">import</span> OpenAI
+
+lake = OpenAI(
+    base_url=<span class="s">"https://&lt;your-link&gt;/v1"</span>,
+    api_key=<span class="s">"klk_..."</span>,
+)
+
+<span class="c"># A model running on your PC</span>
+lake.chat.completions.create(
+    model=<span class="s">"qwen2.5:7b"</span>,
+    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"Hello from my phone"</span>}],
+)
+
+<span class="c"># An answer grounded in your own data</span>
+lake.chat.completions.create(
+    model=<span class="s">"lake"</span>,
+    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"What's in my pricing notes?"</span>}],
+)</pre>
+<pre role="tabpanel" id="p-curl" aria-labelledby="t-curl" tabindex="0" hidden><span class="c"># Rows from a table, filtered and sorted</span>
+curl -H <span class="s">"Authorization: Bearer klk_..."</span> \
+  <span class="s">"https://&lt;your-link&gt;/v1/tables/&lt;id&gt;/rows?where=region:eq:South%20Asia&amp;order=-population&amp;limit=10"</span>
+
+<span class="c"># Search a table by meaning</span>
+curl -H <span class="s">"Authorization: Bearer klk_..."</span> \
+  <span class="s">"https://&lt;your-link&gt;/v1/tables/&lt;id&gt;/search?q=large%20coastal%20cities"</span></pre>
+<pre role="tabpanel" id="p-mcp" aria-labelledby="t-mcp" tabindex="0" hidden>{
+  <span class="k">"mcpServers"</span>: {
+    <span class="k">"keirolake"</span>: {
+      <span class="k">"url"</span>: <span class="s">"https://&lt;your-link&gt;/mcp"</span>,
+      <span class="k">"headers"</span>: { <span class="k">"Authorization"</span>: <span class="s">"Bearer klk_..."</span> }
+    }
+  }
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Run it your way</p>
+        <h2>Desktop, server, or a single container.</h2>
+      </div>
+      <div class="ways reveal">
+        <div class="way"><svg class="i"><use href="#i-desktop"/></svg><strong>Desktop app</strong><p>Windows, macOS and Linux, with a tray icon and auto-updates.</p><code>KeiroLake_x64-setup.exe</code></div>
+        <div class="way"><svg class="i"><use href="#i-server"/></svg><strong>Headless server</strong><p>For a home server, NAS or cloud VM.</p><code>keirolake serve</code></div>
+        <div class="way"><svg class="i"><use href="#i-box"/></svg><strong>Docker</strong><p>One container with the engine, web app and link.</p><code>docker compose up -d</code></div>
+        <div class="way"><svg class="i"><use href="#i-phone"/></svg><strong>Web app</strong><p>Installs on phones and computers from the browser.</p><code>Add to home screen</code></div>
+        <div class="way"><svg class="i"><use href="#i-term"/></svg><strong>Command line</strong><p>Status, keys, tables and builds from scripts.</p><code>keirolake build "…"</code></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="security" style="padding-top:0">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Security</p>
+        <h2>You decide what leaves the machine.</h2>
+        <p class="sub">The engine listens only on 127.0.0.1 with a new token every launch, so websites can't reach it.</p>
+      </div>
+      <div class="sec reveal">
+        <div><strong><svg class="i"><use href="#i-folder"/></svg>One folder you own</strong><p>Back it up, copy it to a drive, or delete it.</p></div>
+        <div><strong><svg class="i"><use href="#i-cloud-off"/></svg>Cloud only if you allow it</strong><p>Nothing reaches the cloud until you add a cloud model, and then only up to a daily cap.</p></div>
+        <div><strong><svg class="i"><use href="#i-lock"/></svg>Locked doors</strong><p>A 10+ character password for every way in, lockout after five wrong tries, rate limits, optional allow-list.</p></div>
+        <div><strong><svg class="i"><use href="#i-key"/></svg>Scoped keys</strong><p>Per-permission and per-collection, expiring, revocable, stored as hashes, every call logged.</p></div>
+        <div><strong><svg class="i"><use href="#i-vault"/></svg>The Vault</strong><p>AES-256-GCM private notes, locked after 15 idle minutes, only ever sent to local models.</p></div>
+        <div><strong><svg class="i"><use href="#i-refresh"/></svg>Signed updates</strong><p>Every release is built and tested in public, and checked against a signature before it installs.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="download" style="padding-top:0">
+    <div class="wrap">
+      <div class="dl reveal">
+        <p class="eyebrow">Download</p>
+        <h2>Free, open source, yours.</h2>
+        <p class="sub">Install it, and it keeps itself up to date. Local models run through <a href="https://ollama.com/download">Ollama</a>.</p>
+        <div class="dl-grid">
+          <div class="os" data-os="windows">
+            <h3>Windows <small></small></h3>
+            <a class="file" data-asset="x64-setup.exe" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest">Installer<span>.exe</span></a>
+            <p>Windows 10 or 11. If SmartScreen warns: More info → Run anyway.</p>
+          </div>
+          <div class="os" data-os="mac">
+            <h3>macOS <small></small></h3>
+            <a class="file" data-asset="aarch64.dmg" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest">Apple Silicon<span>.dmg</span></a>
+            <a class="file" data-asset="x64.dmg" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest">Intel<span>.dmg</span></a>
+            <p>macOS 11+. First launch: right-click the app → Open.</p>
+          </div>
+          <div class="os" data-os="linux">
+            <h3>Linux <small></small></h3>
+            <a class="file" data-asset="amd64.deb" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest">Debian, Ubuntu<span>.deb</span></a>
+            <a class="file" data-asset=".x86_64.rpm" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest">Fedora, openSUSE<span>.rpm</span></a>
+            <a class="file" data-asset="amd64.AppImage" href="https://github.com/KumarRoushan9234/Keirolake/releases/latest">Any distribution<span>.AppImage</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/icon-192.png" alt="" width="24" height="24">KeiroLake</a>
+    <span>MIT licensed</span>
+    <nav aria-label="Links">
+      <a href="https://github.com/KumarRoushan9234/Keirolake/blob/main/docs/guide.md">Guide</a>
+      <a href="https://github.com/KumarRoushan9234/Keirolake/blob/main/docs/architecture.md">Architecture</a>
+      <a href="https://github.com/KumarRoushan9234/Keirolake/blob/main/SECURITY.md">Security</a>
+      <a href="https://github.com/KumarRoushan9234/Keirolake/releases">Releases</a>
+      <a href="https://github.com/KumarRoushan9234/Keirolake">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(() => {
+  document.body.classList.remove("no-js");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+  // Theme: follows the system until chosen, then remembered.
+  const root = document.documentElement, themeBtn = document.getElementById("theme");
+  const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  const paintThemeBtn = () => {
+    themeBtn.innerHTML = `<svg class="i"><use href="#i-${isDark() ? "sun" : "moon"}"/></svg>`;
+    themeBtn.setAttribute("aria-label", isDark() ? "Switch to light theme" : "Switch to dark theme");
+  };
+  const saved = store.get("theme");
+  if (saved) root.dataset.theme = saved;
+  paintThemeBtn();
+  themeBtn.addEventListener("click", () => { root.dataset.theme = isDark() ? "light" : "dark"; store.set("theme", root.dataset.theme); paintThemeBtn(); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paintThemeBtn);
+
+  // Nav border once scrolled.
+  const nav = document.getElementById("nav");
+  addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
+
+  // Demo video plays only while on screen, and not at all for reduced motion.
+  const video = document.getElementById("demo");
+  if (reduce) { video.controls = true; }
+  else if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => { e.isIntersecting ? video.play().catch(() => { video.controls = true; }) : video.pause(); }, { threshold: .25 }).observe(video);
+  }
+
+  // Reveal on scroll.
+  const items = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)) items.forEach((el) => el.classList.add("in"));
+  else {
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -10% 0px" });
+    items.forEach((el) => io.observe(el));
+  }
+
+  // Code tabs, with arrow keys.
+  const tabs = [...document.querySelectorAll(".tab")];
+  const select = (t) => {
+    tabs.forEach((x) => { const on = x === t; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1; document.getElementById(x.getAttribute("aria-controls")).hidden = !on; });
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener("click", () => select(t));
+    t.addEventListener("keydown", (e) => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus(); }
+    });
+  });
+  const copyBtn = document.getElementById("copy");
+  copyBtn.addEventListener("click", async () => {
+    const panel = document.querySelector('pre[role="tabpanel"]:not([hidden])');
+    try { await navigator.clipboard.writeText(panel.textContent); copyBtn.querySelector("span").textContent = "Copied"; }
+    catch { copyBtn.querySelector("span").textContent = "Select and copy"; }
+    setTimeout(() => { copyBtn.querySelector("span").textContent = "Copy"; }, 1600);
+  });
+
+  // Downloads: link each file straight to the latest release, and suggest the visitor's system.
+  const ua = navigator.userAgent, platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  const os = /Win/i.test(platform) || /Windows/.test(ua) ? "windows" : /Mac/i.test(platform) || /Mac OS X/.test(ua) ? (/iPhone|iPad/.test(ua) ? null : "mac") : /Linux/i.test(platform) && !/Android/.test(ua) ? "linux" : null;
+  const names = { windows: "Windows", mac: "macOS", linux: "Linux" };
+  const heroBtn = document.getElementById("hero-dl");
+  if (os) {
+    const card = document.querySelector(`.os[data-os="${os}"]`);
+    card.classList.add("mine"); card.querySelector("small").textContent = "Your system";
+    heroBtn.querySelector("span").textContent = `Download for ${names[os]}`;
+  }
+  fetch("https://api.github.com/repos/KumarRoushan9234/Keirolake/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
+    .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+    .then((rel) => {
+      document.getElementById("version").textContent = rel.tag_name;
+      const assets = rel.assets || [];
+      document.querySelectorAll("a.file").forEach((a) => {
+        const hit = assets.find((x) => x.name.endsWith(a.dataset.asset));
+        if (hit) { a.href = hit.browser_download_url; a.querySelector("span").textContent = `${(hit.size / 2 ** 20).toFixed(0)} MB`; }
+        else { a.querySelector("span").textContent = "not in this release"; a.removeAttribute("href"); a.setAttribute("aria-disabled", "true"); a.style.opacity = ".55"; }
+      });
+      if (os) {
+        const first = document.querySelector(`.os[data-os="${os}"] a.file[href]`);
+        if (first && os !== "mac") heroBtn.href = first.href;
+      }
+      document.getElementById("hero-note").textContent = `${rel.tag_name} · free and open source, MIT licensed.`;
+    })
+    .catch(() => {});
+})();
+</script>
+</body>
+</html>
