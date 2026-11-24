@@ -170,7 +170,11 @@ jobs:
           npm run build
       - name: Engine and Qdrant sidecars
         run: |
+          # Only ready-made wheels for compiled packages: newer cryptography has no Intel Mac wheel, and one built
+          # here links Homebrew's OpenSSL, which clashes with the OpenSSL the packaged engine carries.
+          pip install --only-binary=cryptography,cffi "cryptography>=42"
           pip install -e "backend[desktop]"
+          python -c "import cryptography, ssl; print('cryptography', cryptography.__version__, '|', ssl.OPENSSL_VERSION)"
           python desktop/scripts/build_sidecars.py
       - name: App and disk image (ad-hoc signed)
         working-directory: desktop

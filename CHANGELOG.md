@@ -5,6 +5,9 @@ automatic release.
 
 ## Unreleased
 
+- Intel Mac builds work again (the engine no longer stops at start because of a mismatched OpenSSL).
+- A project website: https://kumarroushan9234.github.io/Keirolake/
+
 ## 0.9.0
 
 **macOS**
