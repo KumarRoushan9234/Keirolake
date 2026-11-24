@@ -1,0 +1,11 @@
+{
+  "name": "keirolake-qa",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Browser checks for the KeiroLake UI: pages, widths, accessibility, text size, keyboard, command palette",
+  "devDependencies": {
+    "axe-core": "^4.10.2",
+    "puppeteer-core": "^24.1.0"
+  }
+}

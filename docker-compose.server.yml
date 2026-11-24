@@ -1,0 +1,35 @@
+# KeiroLake headless server: one container with the engine, web app, API, MCP and local-model access.
+#
+#   KEIROLAKE_PASSWORD='a long password' docker compose -f docker-compose.server.yml up -d --build
+#
+# Open https://<this machine>:8443 and sign in. Set KEIROLAKE_SHARE=internet for a private internet link
+# (docker compose -f docker-compose.server.yml exec keirolake python -m app.cli link).
+# Local models: run Ollama on the host (reached at host.docker.internal), or add --profile ollama.
+
+services:
+  keirolake:
+    build: .
+    image: keirolake:latest
+    container_name: keirolake
+    restart: unless-stopped
+    environment:
+      KEIROLAKE_PASSWORD: ${KEIROLAKE_PASSWORD:?Set KEIROLAKE_PASSWORD to a long password}
+      KEIROLAKE_SHARE: ${KEIROLAKE_SHARE:-wifi}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${KEIROLAKE_PORT:-8443}:8443"
+    volumes:
+      - keirolake_data:/data
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    restart: unless-stopped
+    volumes:
+      - ollama_models:/root/.ollama
+
+volumes:
+  keirolake_data:
+  ollama_models:

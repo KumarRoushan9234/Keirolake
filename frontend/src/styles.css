@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Docker Desktop–style rules: flat panels, 1px borders, 4–6px radius, dense tables, one blue accent,
+   colour only for state. Geist for UI, Geist Mono for data. */
+
+@layer base {
+  :root {
+    --accent-50: 237 243 255; --accent-100: 219 231 255; --accent-200: 176 202 252; --accent-600: 17 80 196;
+    --accent-400: 29 99 237; --accent-500: 17 80 196; --accent-800: 10 52 128;
+    --coral-50: 254 241 241; --coral-100: 253 224 224; --coral-200: 248 186 186; --coral-500: 190 36 42;
+    --sage-50: 236 248 241; --sage-100: 214 240 225; --sage-200: 166 219 189; --sage-500: 22 120 70;
+    --cream-100: 254 245 214; --cream-500: 146 100 0;
+    --surface-primary: 255 255 255; --surface-secondary: 245 247 250; --surface-tertiary: 235 239 244;
+    --line: 221 227 235;
+    --text-primary: 17 24 39; --text-secondary: 55 65 81; --text-muted: 92 102 117;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --thumb: #c7cfda;
+    --focus: #1d63ed;
+    color-scheme: light;
+  }
+/* Accent colours: every solid step keeps white text above 4.5:1 contrast. */
+  :root[data-accent="violet"] { --accent-50: 245 243 255; --accent-100: 237 233 254; --accent-200: 221 214 254; --accent-600: 109 40 217;
+    --accent-400: 109 40 217; --accent-500: 91 33 182; --accent-800: 59 7 100; --focus: rgb(109 40 217); }
+  :root.dark[data-accent="violet"] { --accent-50: 32 24 56; --accent-100: 44 32 78; --accent-200: 70 52 122; --accent-600: 185 165 255; }
+  :root[data-accent="green"] { --accent-50: 236 253 245; --accent-100: 209 250 229; --accent-200: 167 243 208; --accent-600: 4 120 87;
+    --accent-400: 4 120 87; --accent-500: 6 95 70; --accent-800: 6 78 59; --focus: rgb(4 120 87); }
+  :root.dark[data-accent="green"] { --accent-50: 14 40 30; --accent-100: 18 54 40; --accent-200: 30 86 64; --accent-600: 110 231 183; }
+  :root[data-accent="orange"] { --accent-50: 255 247 237; --accent-100: 255 237 213; --accent-200: 254 215 170; --accent-600: 194 65 12;
+    --accent-400: 194 65 12; --accent-500: 154 52 18; --accent-800: 124 45 18; --focus: rgb(194 65 12); }
+  :root.dark[data-accent="orange"] { --accent-50: 50 28 14; --accent-100: 68 36 16; --accent-200: 110 58 24; --accent-600: 253 186 116; }
+  :root[data-accent="rose"] { --accent-50: 255 241 242; --accent-100: 255 228 230; --accent-200: 254 205 211; --accent-600: 190 18 60;
+    --accent-400: 190 18 60; --accent-500: 159 18 57; --accent-800: 136 19 55; --focus: rgb(190 18 60); }
+  :root.dark[data-accent="rose"] { --accent-50: 52 18 26; --accent-100: 70 24 34; --accent-200: 115 36 52; --accent-600: 253 164 175; }
+  :root.dark {
+    --accent-50: 21 33 58; --accent-100: 27 44 80; --accent-200: 40 66 120; --accent-600: 125 168 255;
+    --coral-50: 48 20 22; --coral-100: 66 26 28; --coral-200: 110 40 44; --coral-500: 255 138 140;
+    --sage-50: 16 40 28; --sage-100: 20 54 37; --sage-200: 34 84 58; --sage-500: 110 214 150;
+    --cream-100: 50 40 14; --cream-500: 240 196 90;
+    --surface-primary: 22 27 34; --surface-secondary: 14 17 22; --surface-tertiary: 31 38 48;
+    --line: 42 50 64;
+    --text-primary: 230 237 243; --text-secondary: 178 190 203; --text-muted: 141 154 169;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --thumb: #3a4454;
+    --focus: #7da8ff;
+    color-scheme: dark;
+  }
+
+  :root.hc { --line: 120 113 104; --text-secondary: 26 25 23; --text-muted: 62 58 52; }
+  :root.dark.hc { --line: 150 142 130; --text-secondary: 239 235 229; --text-muted: 205 198 188; }
+  :root.hc *:focus-visible { outline-width: 3px; }
+  :root.hc .card, :root.hc .input-field { border-color: rgb(var(--line)); }
+  :root.calm *, :root.calm *::before, :root.calm *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  html { -webkit-tap-highlight-color: transparent; font-size: calc(16px * var(--text-scale, 1)); }
+  /* The window never scrolls as a whole: only the page area does, so reaching the end can't drag the app down. */
+  html, body, #root { height: 100%; overflow: hidden; overflow: clip; overscroll-behavior: none; }
+  body { @apply bg-surface-secondary font-sans text-text-primary antialiased; font-feature-settings: "cv11", "ss03", "calt"; font-optical-sizing: auto; letter-spacing: -0.003em; }
+  h1, h2, h3, h4 { text-wrap: balance; letter-spacing: -0.012em; font-weight: 600; }
+  .tabular-nums, td, th { font-variant-numeric: tabular-nums; }
+  p, li { text-wrap: pretty; }
+
+  * { scrollbar-width: thin; scrollbar-color: var(--thumb) transparent; }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background-color: var(--thumb); border: 3px solid transparent; background-clip: content-box; border-radius: 999px; }
+  *::-webkit-scrollbar-thumb:hover { background-color: #8b98a7; }
+
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  ::selection { @apply bg-accent-100 text-accent-800; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-property: opacity !important; }
+  }
+}
+
+@layer components {
+  .mono { @apply font-mono text-[0.8125rem]; }
+  .status-dot { @apply inline-block h-2 w-2 shrink-0 rounded-full; }
+  .card { @apply rounded-md border border-line bg-surface-primary p-4; box-shadow: var(--shadow); }
+  .well { @apply rounded-md bg-surface-secondary; }
+
+  .btn { @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-50; }
+  .btn-primary { @apply btn bg-accent-400 text-white hover:bg-accent-500; }
+  .btn-secondary { @apply btn border border-line bg-surface-primary text-text-primary hover:bg-surface-tertiary; }
+  .btn-ghost { @apply btn text-text-secondary hover:bg-surface-tertiary; }
+  .btn-danger { @apply btn bg-coral-50 text-coral-500 hover:bg-coral-100; }
+  .icon-btn { @apply inline-flex items-center justify-center rounded-md p-1.5 text-text-muted transition hover:bg-surface-tertiary hover:text-text-primary disabled:opacity-40; }
+
+  .label { @apply mb-1 block text-sm font-medium text-text-secondary; }
+  .input-field { @apply w-full min-w-0 rounded-md border border-line bg-surface-primary px-3 py-1.5 text-sm text-text-primary transition placeholder:text-text-muted hover:border-accent-200 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-100 disabled:cursor-not-allowed disabled:bg-surface-secondary; }
+  select.input-field { @apply w-auto pr-8; }
+  .field-error { @apply rounded-md border border-coral-200 bg-coral-50 p-3 text-sm text-coral-500; }
+  .field-ok { @apply rounded-md border border-sage-200 bg-sage-50 p-3 text-sm text-sage-500; }
+
+  .chip { @apply inline-flex max-w-full items-center gap-1 truncate rounded-md border border-line bg-surface-primary px-3 py-1 text-xs text-text-secondary transition hover:border-accent-200; }
+  .chip-active { @apply chip border-accent-400 bg-accent-400 font-semibold text-white hover:border-accent-400; }
+  .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold; }
+  .badge-ok { @apply badge bg-sage-100 text-sage-500; }
+  .badge-warn { @apply badge bg-cream-100 text-cream-500; }
+  .badge-bad { @apply badge bg-coral-50 text-coral-500; }
+  .badge-muted { @apply badge bg-surface-tertiary text-text-muted; }
+
+  .nav-item { @apply flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm text-text-secondary transition hover:bg-surface-tertiary hover:text-text-primary; }
+  .nav-item-active { @apply nav-item bg-accent-50 font-medium text-accent-600 hover:bg-accent-50 hover:text-accent-600; }
+
+  .seg { @apply inline-flex rounded-md border border-line bg-surface-secondary p-0.5; }
+  .seg button { @apply rounded px-3 py-1 text-sm text-text-secondary transition; }
+  .seg button[aria-pressed="true"], .seg button[aria-selected="true"] { @apply bg-surface-primary font-medium text-text-primary shadow-sm; }
+
+  .progress-bar { @apply h-1.5 overflow-hidden rounded-full bg-surface-tertiary; }
+  .progress-fill { @apply h-full w-full origin-left rounded-full bg-accent-400 transition-transform duration-500; }
+  .progress-indeterminate { @apply w-1/3; animation: indeterminate 1.4s ease-in-out infinite; }
+  .skeleton { @apply animate-skeleton rounded-md bg-surface-tertiary; }
+
+  .table { @apply w-full border-collapse text-sm; }
+  .table th { @apply sticky top-0 z-[1] border-b border-line bg-surface-secondary px-3 py-2 text-left text-xs font-medium text-text-muted; }
+  .table td { @apply border-t border-line px-3 py-1.5 align-middle; }
+  .table tbody tr:hover { @apply bg-surface-secondary; }
+
+  .md { @apply break-words text-[0.9375rem] leading-7 text-text-primary; }
+  .md > * + * { @apply mt-2; }
+  .md h1, .md h2, .md h3, .md h4 { @apply mt-4 font-semibold; }
+  .md h1 { @apply text-lg; } .md h2 { @apply text-base; }
+  .md ul { @apply list-disc pl-5; } .md ol { @apply list-decimal pl-5; }
+  .md a { @apply text-accent-600 underline underline-offset-2; }
+  .md code { @apply rounded bg-surface-tertiary px-1 font-mono text-xs; }
+  .md pre { @apply overflow-x-auto rounded-md bg-surface-tertiary p-3; }
+  .md pre code { @apply bg-transparent p-0; }
+  .md table { @apply block overflow-x-auto border-collapse; }
+  .md th, .md td { @apply border border-line px-2 py-1; }
+  .md blockquote { @apply border-l-2 border-accent-200 pl-3 text-text-secondary; }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  #print-root, #print-root * { visibility: visible; }
+  #print-root { position: absolute; left: 0; top: 0; width: 100%; padding: 0; color: #000; background: #fff; font-size: 12pt; }
+  #print-root h1 { font-size: 20pt; margin-bottom: 12pt; }
+  #print-root h2 { font-size: 15pt; margin: 0 0 8pt; }
+  #print-root .print-page { break-after: page; margin-bottom: 24pt; }
+  #print-root .print-meta { font-size: 9pt; color: #555; margin-top: 10pt; }
+  #print-root ol, #print-root ul { padding-left: 18pt; }
+}
+
+@keyframes indeterminate { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+@media (prefers-reduced-motion: reduce) { .progress-indeterminate { animation: none; } }

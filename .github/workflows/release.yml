@@ -1,0 +1,223 @@
+# Every push to main that changes the app builds, tests and publishes a release:
+#   - the version is the one in the repository, or one patch above the newest release if that one is taken
+#     (bump minor/major yourself: python desktop/scripts/set_version.py 0.9.0);
+#   - Windows installer and Linux .deb, .rpm and AppImage, each tested before publishing;
+#   - installed apps see the new latest.json and update themselves (signed with TAURI_SIGNING_PRIVATE_KEY).
+# Pushing a tag vX.Y.Z releases exactly that version. Put [skip release] in a commit message to push without one.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths-ignore: ["**.md", "docs/**", ".gitignore", "LICENSE"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: v
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then v="${GITHUB_REF#refs/tags/v}"; else v="$(python3 desktop/scripts/set_version.py --next)"; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Releasing $v"
+
+  test:
+    needs: plan
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Engine tests
+        run: |
+          pip install -e "backend[dev]"
+          cd backend && python -m pytest -q -m "not integration"
+      - name: Interface type-check and build
+        working-directory: frontend
+        run: npm ci && npm run build
+
+  windows:
+    needs: [plan, test]
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+      - name: Version
+        run: python desktop/scripts/set_version.py ${{ needs.plan.outputs.version }}
+      - name: Web interface (bundled into the engine and the app)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+      - name: Engine and Qdrant sidecars
+        run: |
+          pip install -e "backend[desktop]"
+          python desktop/scripts/build_sidecars.py
+      - name: Installer
+        working-directory: desktop
+        run: |
+          npm ci
+          npx tauri build --config src-tauri/tauri.bundle.conf.json --bundles nsis
+      - name: Frozen engine check
+        run: python qa/frozen_check.py desktop/src-tauri/binaries/keirolake-engine-x86_64-pc-windows-msvc.exe
+      - name: Sign for the updater
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          mkdir -p out
+          cp desktop/src-tauri/target/release/bundle/nsis/KeiroLake_${{ needs.plan.outputs.version }}_x64-setup.exe out/
+          cd desktop && npx tauri signer sign ../out/KeiroLake_${{ needs.plan.outputs.version }}_x64-setup.exe
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: out/*
+
+  linux:
+    needs: [plan, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Version
+        run: python3 desktop/scripts/set_version.py ${{ needs.plan.outputs.version }}
+      - name: Build on Ubuntu 22.04 and test each package on a clean system
+        run: bash desktop/scripts/ci_linux.sh
+      - name: Sign the packages for the updater (AppImage updates itself; .deb and .rpm through the app's update button)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          sudo chown -R "$USER" dist
+          cd desktop && npm ci --no-audit --no-fund
+          v=${{ needs.plan.outputs.version }}
+          for f in "KeiroLake_${v}_amd64.AppImage" "KeiroLake_${v}_amd64.deb" "KeiroLake-${v}-1.x86_64.rpm"; do
+            npx tauri signer sign "../dist/linux/$f"
+          done
+      - uses: actions/upload-artifact@v7
+        with:
+          name: linux
+          path: |
+            dist/linux/*${{ needs.plan.outputs.version }}*
+
+  # macOS on GitHub's free Mac runners: Apple Silicon and Intel. Ad-hoc signed (no Apple account), so the first launch
+  # needs right-click → Open; updates after that are checked with the same updater key as Windows and Linux.
+  macos:
+    needs: [plan, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: aarch64
+          - runner: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+      - name: Version
+        run: python3 desktop/scripts/set_version.py ${{ needs.plan.outputs.version }}
+      - name: Web interface
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+      - name: Engine and Qdrant sidecars
+        run: |
+          pip install -e "backend[desktop]"
+          python desktop/scripts/build_sidecars.py
+      - name: App and disk image (ad-hoc signed)
+        working-directory: desktop
+        run: |
+          npm ci
+          npx tauri build --config src-tauri/tauri.bundle.conf.json --bundles app,dmg \
+            --config '{"bundle":{"macOS":{"signingIdentity":"-"}}}'
+      - name: Frozen engine check
+        run: python qa/frozen_check.py desktop/src-tauri/binaries/keirolake-engine-${{ matrix.arch }}-apple-darwin
+      - name: Package and sign for the updater
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          v=${{ needs.plan.outputs.version }}; a=${{ matrix.arch }}
+          b=desktop/src-tauri/target/release/bundle
+          mkdir -p out
+          cp "$(ls $b/dmg/*.dmg | head -1)" "out/KeiroLake_${v}_${a}.dmg"
+          tar -czf "out/KeiroLake_${v}_${a}.app.tar.gz" -C $b/macos KeiroLake.app
+          cd desktop && npx tauri signer sign "../out/KeiroLake_${v}_${a}.app.tar.gz"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: macos-${{ matrix.arch }}
+          path: out/*
+
+  publish:
+    # Windows and Linux must pass; a Mac build that fails is left out of the release instead of blocking it.
+    needs: [plan, windows, linux, macos]
+    if: ${{ !cancelled() && needs.windows.result == 'success' && needs.linux.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: out
+          merge-multiple: true
+      - name: Updater manifest, checksums and notes
+        run: |
+          v=${{ needs.plan.outputs.version }}
+          python3 desktop/scripts/updater_manifest.py "$v" "$GITHUB_REPOSITORY" out
+          (cd out && sha256sum KeiroLake* > SHA256SUMS)
+          python3 desktop/scripts/release_notes.py "$v" "$GITHUB_REPOSITORY" out > notes.md
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${{ needs.plan.outputs.version }}
+          gh release create "v$v" out/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "KeiroLake $v" --notes-file notes.md --generate-notes --latest

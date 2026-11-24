@@ -1,0 +1,52 @@
+# ---- Secrets: never commit ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+secrets*
+credentials*.json
+.claude/
+
+# ---- Internal notes ----
+docs/plan-*.md
+docs/desktop-offline-plan.md
+
+# ---- Desktop build output (installers come from Releases) ----
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+desktop/src-tauri/binaries/*
+!desktop/src-tauri/binaries/.gitkeep
+desktop/build/
+
+# ---- Data and build output ----
+data/
+dist/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.zim
+*.gguf
+*.log
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+.ruff_cache/
+
+# ---- Node ----
+node_modules/
+frontend/dist/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,8 @@
+region,month,product,units,amount
+north,2026-01,widget,120,2400
+north,2026-02,widget,150,3000
+south,2026-01,widget,90,1800
+south,2026-02,gadget,60,2400
+east,2026-01,gadget,75,3000
+east,2026-02,widget,110,2200
+west,2026-02,gadget,40,1600

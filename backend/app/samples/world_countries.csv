@@ -1,0 +1,218 @@
+country,iso3,region,income_group,capital,population,gdp_per_capita_usd,life_expectancy,co2_tonnes_per_person,year
+India,IND,South Asia,Lower middle income,New Delhi,1414203896,2702.5,72.2,2.17,2021
+China,CHN,East Asia & Pacific,Upper middle income,Beijing,1412360000,13862.0,78.0,9.32,2021
+United States,USA,North America,High income,Washington D.C.,332100166,90026.5,78.9,13.62,2021
+Indonesia,IDN,East Asia & Pacific,Upper middle income,Jakarta,276758053,5059.6,71.3,2.87,2021
+Pakistan,PAK,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,Islamabad,239477801,1595.9,67.8,0.81,2021
+Nigeria,NGA,Sub-Saharan Africa ,Lower middle income,Abuja,218529286,1224.3,54.6,0.57,2021
+Brazil,BRA,Latin America & Caribbean ,Upper middle income,Brasilia,209550294,10713.3,76.0,2.32,2021
+Bangladesh,BGD,South Asia,Lower middle income,Dhaka,167658854,2597.3,74.9,0.72,2021
+Russian Federation,RUS,Europe & Central Asia,High income,Moscow,144746762,17546.6,73.4,13.98,2021
+Mexico,MEX,Latin America & Caribbean ,Upper middle income,Mexico City,127648148,13889.2,75.3,3.64,2021
+Japan,JPN,East Asia & Pacific,High income,Tokyo,125681593,35951.0,84.0,7.84,2021
+Ethiopia,ETH,Sub-Saharan Africa ,Low income,Addis Ababa,122138588,932.7,67.6,0.15,2021
+Philippines,PHL,East Asia & Pacific,Upper middle income,Manila,113100950,4170.7,69.9,1.5,2021
+"Egypt, Arab Rep.",EGY,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,Cairo,110957008,3085.8,71.8,2.5,2021
+"Congo, Dem. Rep.",COD,Sub-Saharan Africa ,Low income,Kinshasa,99148932,806.8,62.1,0.06,2021
+Viet Nam,VNM,East Asia & Pacific,Upper middle income,Hanoi,98935098,5066.0,74.7,4.27,2021
+"Iran, Islamic Rep.",IRN,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,Tehran,88455488,3924.4,77.9,9.05,2021
+Turkiye,TUR,Europe & Central Asia,Upper middle income,Ankara,84147318,18599.4,77.4,5.38,2021
+Germany,DEU,Europe & Central Asia,High income,Berlin,83196078,60496.4,80.8,6.94,2021
+Thailand,THA,East Asia & Pacific,Upper middle income,Bangkok,71727332,8056.6,76.6,3.96,2021
+France,FRA,Europe & Central Asia,High income,Paris,67842811,48985.7,83.0,4.0,2021
+United Kingdom,GBR,Europe & Central Asia,High income,London,66978000,57602.0,81.4,4.22,2021
+Tanzania,TZA,Sub-Saharan Africa ,Lower middle income,Dodoma,62830412,1318.8,67.2,0.31,2021
+South Africa,ZAF,Sub-Saharan Africa ,Upper middle income,Pretoria,61502603,6597.7,66.3,6.88,2021
+Italy,ITA,Europe & Central Asia,High income,Rome,59133173,43308.6,84.0,5.08,2021
+Myanmar,MMR,East Asia & Pacific,Lower middle income,Naypyidaw,53387102,1488.9,67.1,0.58,2021
+Kenya,KEN,Sub-Saharan Africa ,Lower middle income,Nairobi,53219166,2362.9,63.8,0.38,2021
+"Korea, Rep.",KOR,East Asia & Pacific,High income,Seoul,51769539,36227.0,83.6,11.36,2021
+Colombia,COL,Latin America & Caribbean ,Upper middle income,Bogota,51188173,8561.6,77.9,1.8,2021
+Sudan,SDN,Sub-Saharan Africa ,Low income,Khartoum,48066924,1164.5,66.5,0.43,2021
+Spain,ESP,Europe & Central Asia,High income,Madrid,47443821,38627.2,83.9,4.51,2021
+Uganda,UGA,Sub-Saharan Africa ,Low income,Kampala,45910930,1206.3,68.5,0.17,2021
+Argentina,ARG,Latin America & Caribbean ,Upper middle income,Buenos Aires,45312281,14898.1,77.5,4.01,2021
+Algeria,DZA,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,Algiers,44761099,6051.0,76.5,3.98,2021
+Ukraine,UKR,Europe & Central Asia,Upper middle income,Kiev,44298640,5865.9,74.7,3.13,2021
+Iraq,IRQ,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,Baghdad,43071211,5409.7,72.4,5.18,2021
+Afghanistan,AFG,"Middle East, North Africa, Afghanistan & Pakistan",Low income,Kabul,40000412,416.9,66.3,0.28,2021
+Canada,CAN,North America,High income,Ottawa,38239864,55697.7,82.1,14.01,2021
+"Yemen, Rep.",YEM,"Middle East, North Africa, Afghanistan & Pakistan",Low income,Sana'a,37140230,633.9,69.4,0.26,2021
+Poland,POL,Europe & Central Asia,High income,Warsaw,36981559,28419.6,78.4,7.55,2021
+Morocco,MAR,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,Rabat,36954442,4672.5,75.5,1.84,2021
+Angola,AGO,Sub-Saharan Africa ,Lower middle income,Luanda,34532429,3129.5,64.8,0.74,2021
+Malaysia,MYS,East Asia & Pacific,Upper middle income,Kuala Lumpur,34282399,13124.6,76.8,8.32,2021
+Uzbekistan,UZB,Europe & Central Asia,Lower middle income,Tashkent,34243696,3968.3,72.5,4.09,2021
+Peru,PER,Latin America & Caribbean ,Upper middle income,Lima,33155882,9684.4,77.9,2.02,2021
+Ghana,GHA,Sub-Saharan Africa ,Lower middle income,Accra,32518665,3257.2,65.7,0.7,2021
+Mozambique,MOZ,Sub-Saharan Africa ,Low income,Maputo,31707800,626.9,63.8,0.29,2021
+Saudi Arabia,SAU,"Middle East, North Africa, Afghanistan & Pakistan",High income,Riyadh,30784383,34536.7,79.0,18.48,2021
+Madagascar,MDG,Sub-Saharan Africa ,Low income,Antananarivo,29691083,599.3,63.8,0.15,2021
+Cote d'Ivoire,CIV,Sub-Saharan Africa ,Lower middle income,Yamoussoukro,29639736,3050.1,62.1,0.59,2021
+Nepal,NPL,South Asia,Lower middle income,Kathmandu,29475010,1535.9,70.6,0.54,2021
+"Venezuela, RB",VEN,Latin America & Caribbean ,Lower middle income,Caracas,28237826,3494.8,72.7,3.39,2021
+Cameroon,CMR,Sub-Saharan Africa ,Lower middle income,Yaounde,26915758,1972.4,64.0,0.35,2021
+"Korea, Dem. People's Rep.",PRK,East Asia & Pacific,Low income,Pyongyang,26232534,,73.7,2.5,2021
+Australia,AUS,East Asia & Pacific,High income,Canberra,25685412,65129.7,83.1,14.1,2021
+Niger,NER,Sub-Saharan Africa ,Low income,Niamey,24502140,775.4,61.4,0.12,2021
+Mali,MLI,Sub-Saharan Africa ,Low income,Bamako,22388630,1193.3,60.7,0.3,2021
+Sri Lanka,LKA,South Asia,Upper middle income,Colombo,22156000,5002.1,77.7,1.06,2021
+Burkina Faso,BFA,Sub-Saharan Africa ,Low income,Ouagadougou,21995243,1147.6,61.3,0.27,2021
+Syrian Arab Republic,SYR,"Middle East, North Africa, Afghanistan & Pakistan",Low income,Damascus,21628839,1056.8,72.6,1.27,2021
+Malawi,MWI,Sub-Saharan Africa ,Low income,Lilongwe,20047258,671.5,67.6,0.22,2021
+Kazakhstan,KAZ,Europe & Central Asia,Upper middle income,Astana,19743603,14692.1,74.5,12.57,2021
+Zambia,ZMB,Sub-Saharan Africa ,Lower middle income,Lusaka,19603607,1317.9,66.5,0.54,2021
+Chile,CHL,Latin America & Caribbean ,High income,Santiago,19456334,17994.6,81.4,3.94,2021
+Romania,ROU,Europe & Central Asia,High income,Bucharest,19122059,22538.0,76.5,3.72,2021
+Chad,TCD,Sub-Saharan Africa ,Low income,N'Djamena,17828273,1022.3,55.2,0.14,2021
+Ecuador,ECU,Latin America & Caribbean ,Upper middle income,Quito,17682454,7125.3,77.6,2.64,2021
+Guatemala,GTM,Latin America & Caribbean ,Upper middle income,Guatemala City,17598650,6598.2,72.7,1.11,2021
+Netherlands,NLD,Europe & Central Asia,High income,Amsterdam,17533044,73683.9,82.0,6.6,2021
+"Somalia, Fed. Rep.",SOM,Sub-Saharan Africa ,Low income,Mogadishu,17271431,661.2,59.0,0.05,2021
+Senegal,SEN,Sub-Saharan Africa ,Lower middle income,Dakar,17220867,1954.7,68.9,0.77,2021
+Cambodia,KHM,East Asia & Pacific,Lower middle income,Phnom Penh,16974305,2872.4,70.8,1.1,2021
+Zimbabwe,ZWE,Sub-Saharan Africa ,Lower middle income,Harare,15797210,3021.4,63.1,0.77,2021
+Guinea,GIN,Sub-Saharan Africa ,Lower middle income,Conakry,13710513,1877.3,60.9,0.35,2021
+Benin,BEN,Sub-Saharan Africa ,Lower middle income,Porto-Novo,13413417,1658.3,61.0,0.49,2021
+Rwanda,RWA,Sub-Saharan Africa ,Low income,Kigali,13355260,1123.7,68.0,0.16,2021
+Burundi,BDI,Sub-Saharan Africa ,Low income,Bujumbura,12965481,233.8,63.8,0.07,2021
+Tunisia,TUN,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,Tunis,12048622,4656.6,76.7,2.62,2021
+Bolivia,BOL,Latin America & Caribbean ,Lower middle income,La Paz,11937360,5147.8,68.7,2.29,2021
+Belgium,BEL,Europe & Central Asia,High income,Brussels,11586195,60750.3,82.3,7.31,2021
+Haiti,HTI,Latin America & Caribbean ,Lower middle income,Port-au-Prince,11374586,2694.2,65.1,0.3,2021
+Dominican Republic,DOM,Latin America & Caribbean ,Upper middle income,Santo Domingo,11123476,11059.2,73.9,2.99,2021
+Cuba,CUB,Latin America & Caribbean ,Upper middle income,Havana,11122168,9605.3,78.3,1.91,2021
+Jordan,JOR,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,Amman,11066356,5347.8,78.0,2.09,2021
+South Sudan,SSD,Sub-Saharan Africa ,Low income,Juba,10865780,1080.1,57.7,,2021
+Greece,GRC,Europe & Central Asia,High income,Athens,10570130,26948.0,81.8,5.05,2021
+Czechia,CZE,Europe & Central Asia,High income,Prague,10505772,35917.3,80.0,7.13,2021
+Sweden,SWE,Europe & Central Asia,High income,Stockholm,10415811,63133.2,84.1,3.57,2021
+Portugal,PRT,Europe & Central Asia,High income,Lisbon,10361831,32081.8,82.4,3.32,2021
+Honduras,HND,Latin America & Caribbean ,Lower middle income,Tegucigalpa,10289877,3598.2,73.0,1.14,2021
+Azerbaijan,AZE,Europe & Central Asia,Upper middle income,Baku,10137750,7410.7,74.6,3.81,2021
+Papua New Guinea,PNG,East Asia & Pacific,Lower middle income,Port Moresby,10012896,3019.5,66.3,0.52,2021
+Tajikistan,TJK,Europe & Central Asia,Lower middle income,Dushanbe,9966908,1637.3,71.9,0.92,2021
+Hungary,HUN,Europe & Central Asia,High income,Budapest,9630932,25907.5,76.7,4.46,2021
+United Arab Emirates,ARE,"Middle East, North Africa, Afghanistan & Pakistan",High income,Abu Dhabi,9575152,50273.5,83.1,18.26,2021
+Israel,ISR,"Middle East, North Africa, Afghanistan & Pakistan",High income,,9371400,60336.8,83.2,5.77,2021
+Belarus,BLR,Europe & Central Asia,Upper middle income,Minsk,9302585,10279.3,74.4,5.94,2021
+Austria,AUT,Europe & Central Asia,High income,Vienna,8955797,62930.0,82.0,6.32,2021
+Switzerland,CHE,Europe & Central Asia,High income,Bern,8704546,114769.0,84.4,3.75,2021
+Sierra Leone,SLE,Sub-Saharan Africa ,Low income,Freetown,8094602,846.3,62.0,0.17,2021
+Togo,TGO,Sub-Saharan Africa ,Lower middle income,Lome,7936176,1383.9,62.9,0.31,2021
+Lao PDR,LAO,East Asia & Pacific,Lower middle income,Vientiane,7453194,2324.8,69.2,3.35,2021
+"Hong Kong SAR, China",HKG,East Asia & Pacific,High income,,7413100,56983.1,85.4,4.6,2021
+Libya,LBY,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,Tripoli,7135175,6448.8,71.1,8.66,2021
+Turkmenistan,TKM,Europe & Central Asia,Upper middle income,Ashgabat,7092043,6540.2,70.2,10.86,2021
+Kyrgyz Republic,KGZ,Europe & Central Asia,Lower middle income,Bishkek,6851224,3081.0,72.4,1.49,2021
+Serbia,SRB,Europe & Central Asia,Upper middle income,Belgrade,6834326,15262.0,76.0,,2021
+Paraguay,PRY,Latin America & Caribbean ,Upper middle income,Asuncion,6684182,7026.6,74.0,1.16,2021
+Nicaragua,NIC,Latin America & Caribbean ,Lower middle income,Managua,6644741,3173.3,75.1,0.83,2021
+Bulgaria,BGR,Europe & Central Asia,High income,Sofia,6507301,20328.2,75.8,5.31,2021
+El Salvador,SLV,Latin America & Caribbean ,Upper middle income,San Salvador,6255782,5766.7,72.3,1.51,2021
+"Congo, Rep.",COG,Sub-Saharan Africa ,Lower middle income,Brazzaville,5892183,2514.7,66.0,1.34,2021
+Denmark,DNK,Europe & Central Asia,High income,Copenhagen,5856733,76970.2,82.3,4.28,2021
+Lebanon,LBN,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,Beirut,5718122,4473.3,77.9,1.9,2021
+Finland,FIN,Europe & Central Asia,High income,Helsinki,5541017,56148.6,82.3,5.54,2021
+Singapore,SGP,East Asia & Pacific,High income,Singapore,5453566,98814.0,83.3,9.75,2021
+Slovak Republic,SVK,Europe & Central Asia,High income,Bratislava,5447247,28543.7,78.4,5.51,2021
+Norway,NOR,Europe & Central Asia,High income,Oslo,5408320,94594.2,83.2,7.18,2021
+Liberia,LBR,Sub-Saharan Africa ,Low income,Monrovia,5259323,915.3,62.3,0.15,2021
+Central African Republic,CAF,Sub-Saharan Africa ,Low income,Bangui,5112100,556.1,57.7,0.06,2021
+Ireland,IRL,Europe & Central Asia,High income,Dublin,5110585,131592.5,83.0,6.04,2021
+New Zealand,NZL,East Asia & Pacific,High income,Wellington,5084600,49591.0,82.0,6.01,2021
+Costa Rica,CRI,Latin America & Caribbean ,High income,San Jose,5059988,19970.1,81.0,1.63,2021
+West Bank and Gaza,PSE,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,,4922749,3171.1,69.2,,2021
+Mauritania,MRT,Sub-Saharan Africa ,Lower middle income,Nouakchott,4734874,2197.5,68.7,0.97,2021
+Oman,OMN,"Middle East, North Africa, Afghanistan & Pakistan",High income,Muscat,4500424,19947.4,80.2,18.65,2021
+Kuwait,KWT,"Middle East, North Africa, Afghanistan & Pakistan",High income,Kuwait City,4360865,32312.3,84.6,23.67,2021
+Panama,PAN,Latin America & Caribbean ,High income,Panama City,4345405,19789.7,79.8,2.74,2021
+Croatia,HRV,Europe & Central Asia,High income,Zagreb,3878981,27103.9,78.9,4.83,2021
+Georgia,GEO,Europe & Central Asia,Upper middle income,Tbilisi,3708610,9691.5,74.7,3.53,2021
+Uruguay,URY,Latin America & Caribbean ,High income,Montevideo,3396695,25215.8,78.3,2.57,2021
+Mongolia,MNG,East Asia & Pacific,Upper middle income,Ulaanbaatar,3383741,7108.2,72.4,7.85,2021
+Eritrea,ERI,Sub-Saharan Africa ,Low income,Asmara,3350183,688.7,68.9,0.22,2021
+Puerto Rico (US),PRI,Latin America & Caribbean ,High income,San Juan,3262731,40620.2,81.9,4.82,2021
+Bosnia and Herzegovina,BIH,Europe & Central Asia,Upper middle income,Sarajevo,3244907,10381.8,78.0,6.45,2021
+Armenia,ARM,Europe & Central Asia,Upper middle income,Yerevan,2962300,9474.0,78.3,2.47,2021
+Jamaica,JAM,Latin America & Caribbean ,Upper middle income,Kingston,2837682,8002.9,71.6,2.84,2021
+Namibia,NAM,Sub-Saharan Africa ,Lower middle income,Windhoek,2810548,4875.9,67.5,1.2,2021
+Lithuania,LTU,Europe & Central Asia,High income,Vilnius,2808380,32958.7,77.2,4.49,2021
+Moldova,MDA,Europe & Central Asia,Upper middle income,Chisinau,2595809,8621.7,71.3,3.42,2021
+"Gambia, The",GMB,Sub-Saharan Africa ,Low income,Banjul,2576010,919.1,66.1,0.18,2021
+Qatar,QAT,"Middle East, North Africa, Afghanistan & Pakistan",High income,Doha,2504910,72524.9,82.5,47.33,2021
+Albania,ALB,Europe & Central Asia,Upper middle income,Tirane,2489762,12998.1,79.8,1.79,2021
+Botswana,BWA,Sub-Saharan Africa ,Upper middle income,Gaborone,2401441,7778.1,69.3,2.74,2021
+Gabon,GAB,Sub-Saharan Africa ,Upper middle income,Libreville,2376722,8263.0,68.5,2.05,2021
+Lesotho,LSO,Sub-Saharan Africa ,Lower middle income,Maseru,2261542,1089.0,57.8,0.43,2021
+Slovenia,SVN,Europe & Central Asia,High income,Ljubljana,2108079,37376.2,82.3,6.27,2021
+Guinea-Bissau,GNB,Sub-Saharan Africa ,Low income,Bissau,2058841,1123.8,64.3,0.16,2021
+Latvia,LVA,Europe & Central Asia,High income,Riga,1884490,26312.0,76.4,3.65,2021
+North Macedonia,MKD,Europe & Central Asia,Upper middle income,Skopje,1837114,10489.9,76.6,4.0,2021
+Kosovo,XKX,Europe & Central Asia,Upper middle income,Pristina,1786079,7899.4,78.2,,2021
+Equatorial Guinea,GNQ,Sub-Saharan Africa ,Upper middle income,Malabo,1758786,6615.3,63.9,2.55,2021
+Bahrain,BHR,"Middle East, North Africa, Afghanistan & Pakistan",High income,Manama,1504365,30596.6,81.4,23.9,2021
+Trinidad and Tobago,TTO,Latin America & Caribbean ,High income,Port-of-Spain,1367558,18967.3,73.6,19.58,2021
+Timor-Leste,TLS,East Asia & Pacific,Lower middle income,Dili,1350139,1341.0,67.9,0.5,2021
+Estonia,EST,Europe & Central Asia,High income,Tallinn,1330932,34417.6,79.3,7.76,2021
+Cyprus,CYP,Europe & Central Asia,High income,Nicosia,1317309,41783.1,81.8,5.4,2021
+Mauritius,MUS,Sub-Saharan Africa ,Upper middle income,Port Louis,1266334,12991.3,73.8,3.54,2021
+Eswatini,SWZ,Sub-Saharan Africa ,Lower middle income,Mbabane,1206593,4108.3,64.3,0.88,2021
+Djibouti,DJI,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,Djibouti,1121248,3905.6,66.2,0.77,2021
+Fiji,FJI,East Asia & Pacific,Upper middle income,Suva,916711,6642.0,67.5,1.62,2021
+Comoros,COM,Sub-Saharan Africa ,Lower middle income,Moroni,818174,2055.8,67.0,0.51,2021
+Guyana,GUY,Latin America & Caribbean ,High income,Georgetown,815482,32413.8,70.3,4.56,2021
+Bhutan,BTN,South Asia,Lower middle income,Thimphu,775442,4492.8,73.3,2.01,2021
+Solomon Islands,SLB,East Asia & Pacific,Lower middle income,Honiara,762591,2086.2,70.7,0.38,2021
+"Macao SAR, China",MAC,East Asia & Pacific,High income,,682500,75901.7,83.3,2.53,2021
+Luxembourg,LUX,Europe & Central Asia,High income,Luxembourg,640064,147252.2,83.2,10.56,2021
+Montenegro,MNE,Europe & Central Asia,Upper middle income,Podgorica,625053,14816.8,77.9,,2021
+Suriname,SUR,Latin America & Caribbean ,Upper middle income,Paramaribo,617896,7069.9,73.8,4.06,2021
+Malta,MLT,"Middle East, North Africa, Afghanistan & Pakistan",High income,Valletta,518150,47906.9,83.0,3.18,2021
+Cabo Verde,CPV,Sub-Saharan Africa ,Upper middle income,Praia,516649,5796.5,76.2,1.29,2021
+Maldives,MDV,South Asia,Upper middle income,Male,516154,14614.7,81.3,3.57,2021
+Brunei Darussalam,BRN,East Asia & Pacific,High income,Bandar Seri Begawan,451721,32234.6,75.5,20.24,2021
+"Bahamas, The",BHS,Latin America & Caribbean ,High income,Nassau,396373,39455.4,74.7,3.64,2021
+Belize,BLZ,Latin America & Caribbean ,Upper middle income,Belmopan,395346,7865.5,73.7,0.93,2021
+Iceland,ISL,Europe & Central Asia,High income,Reykjavik,372520,98323.5,82.8,8.52,2021
+Vanuatu,VUT,East Asia & Pacific,Lower middle income,Port-Vila,305868,4038.7,71.7,0.87,2021
+New Caledonia,NCL,East Asia & Pacific,High income,Noum'ea,285214,29213.2,78.9,17.08,2021
+Barbados,BRB,Latin America & Caribbean ,High income,Bridgetown,282147,28364.8,76.3,2.52,2021
+French Polynesia,PYF,East Asia & Pacific,High income,Papeete,279792,22439.9,84.2,3.46,2021
+Sao Tome and Principe,STP,Sub-Saharan Africa ,Lower middle income,Sao Tome,221961,4084.4,69.9,0.63,2021
+Samoa,WSM,East Asia & Pacific,Upper middle income,Apia,213779,5872.8,71.8,1.6,2021
+St. Lucia,LCA,Latin America & Caribbean ,Upper middle income,Castries,178522,14745.8,72.8,1.71,2021
+Channel Islands,CHI,Europe & Central Asia,High income,,166741,74585.5,81.2,,2021
+Guam,GUM,East Asia & Pacific,High income,Agana,163730,41833.2,77.4,0.0,2021
+Curacao,CUW,Latin America & Caribbean ,High income,Willemstad,153948,22832.9,77.0,,2021
+Kiribati,KIR,East Asia & Pacific,Lower middle income,Tarawa,128377,2558.7,66.6,0.59,2021
+Grenada,GRD,Latin America & Caribbean ,Upper middle income,Saint George's,116688,12106.9,75.4,1.5,2021
+"Micronesia, Fed. Sts.",FSM,East Asia & Pacific,Upper middle income,Palikir,111624,4414.0,67.4,0.0,2021
+Aruba,ABW,Latin America & Caribbean ,High income,Oranjestad,107700,38590.6,76.5,5.15,2021
+Virgin Islands (U.S.),VIR,Latin America & Caribbean ,High income,Charlotte Amalie,105870,44320.9,80.8,0.0,2021
+Tonga,TON,East Asia & Pacific,Upper middle income,Nuku'alofa,105490,6547.2,73.1,1.63,2021
+St. Vincent and the Grenadines,VCT,Latin America & Caribbean ,Upper middle income,Kingstown,102841,12561.8,71.4,1.31,2021
+Seychelles,SYC,Sub-Saharan Africa ,High income,Victoria,99258,19449.4,76.3,7.24,2021
+Antigua and Barbuda,ATG,Latin America & Caribbean ,High income,Saint John's,92349,24819.2,77.8,3.8,2021
+Isle of Man,IMN,Europe & Central Asia,High income,Douglas,84106,90015.2,81.1,,2021
+Andorra,AND,Europe & Central Asia,High income,Andorra la Vella,78364,54291.5,84.2,,2021
+Cayman Islands,CYM,Latin America & Caribbean ,High income,George Town,70108,104292.9,80.5,5.0,2021
+Dominica,DMA,Latin America & Caribbean ,Upper middle income,Roseau,67202,10989.0,71.3,1.27,2021
+Bermuda,BMU,North America,High income,Hamilton,64648,142250.4,82.5,4.14,2021
+Greenland,GRL,Europe & Central Asia,High income,Nuuk,56653,58499.0,70.3,10.45,2021
+Faroe Islands,FRO,Europe & Central Asia,High income,Torshavn,53291,74175.3,83.1,0.04,2021
+American Samoa,ASM,East Asia & Pacific,High income,Pago Pago,49225,18017.5,73.0,0.0,2021
+Northern Mariana Islands,MNP,East Asia & Pacific,High income,Saipan,46979,23785.8,78.9,0.0,2021
+St. Kitts and Nevis,KNA,Latin America & Caribbean ,High income,Basseterre,46763,25223.0,72.3,2.88,2021
+Turks and Caicos Islands,TCA,Latin America & Caribbean ,High income,Grand Turk,45243,37506.8,78.2,4.92,2021
+Sint Maarten (Dutch part),SXM,Latin America & Caribbean ,High income,Philipsburg,41571,42978.1,76.5,,2021
+Marshall Islands,MHL,East Asia & Pacific,Upper middle income,Majuro,41367,8489.1,67.1,0.0,2021
+Liechtenstein,LIE,Europe & Central Asia,High income,Vaduz,39182,220167.2,84.2,,2021
+Monaco,MCO,Europe & Central Asia,High income,Monaco,38527,288001.6,86.5,,2021
+British Virgin Islands,VGB,Latin America & Caribbean ,High income,Road Town,37809,,77.4,2.33,2021
+Gibraltar,GIB,Europe & Central Asia,High income,,36858,,83.6,16.15,2021
+San Marino,SMR,Europe & Central Asia,High income,San Marino,34252,59871.3,85.8,,2021
+St. Martin (French part),MAF,Latin America & Caribbean ,High income,Marigot,29961,21668.4,80.4,,2021
+Palau,PLW,East Asia & Pacific,High income,Koror,17783,19532.4,69.4,82.84,2021
+Naoero,NRU,East Asia & Pacific,High income,Yaren District,11709,14639.5,62.3,0,2021
+Tuvalu,TUV,East Asia & Pacific,Upper middle income,Funafuti,10194,6041.4,67.3,0,2021

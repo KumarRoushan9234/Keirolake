@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "web",
+  "description": "The live web window may only hand back a page the user asked to save (checked with a one-time nonce)",
+  "windows": ["web"],
+  "remote": { "urls": ["https://*", "http://*"] },
+  "permissions": ["allow-web-captured"]
+}
