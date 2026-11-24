@@ -18,8 +18,14 @@ data = Path(tempfile.mkdtemp(prefix="keirolake-frozen-"))
 env = {**os.environ, "DATA_DIR": str(data), "QDRANT_PATH": str(data / "q"), "KEIROLAKE_PORT": "8799", "KEIROLAKE_KEYRING": "0",
        "LOCAL_AUTOSTART": "0", "OLLAMA_BASE_URL": "http://127.0.0.1:9", "KEIROLAKE_TOKEN": "frozen-token",
        "OPENROUTER_API_KEY": "", "KEIROLABS_API_KEY": "", "KEIROLABS_SEARCH_LITE_API_KEY": ""}
-proc = subprocess.Popen([exe], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+log = open(data / "engine.log", "w+", encoding="utf-8", errors="replace")
+proc = subprocess.Popen([exe], env=env, stdout=log, stderr=subprocess.STDOUT)
 results = []
+
+
+def engine_log() -> str:
+    log.flush()
+    return (data / "engine.log").read_text(encoding="utf-8", errors="replace")[-6000:]
 
 
 def check(name, ok, detail=""):
@@ -29,12 +35,21 @@ def check(name, ok, detail=""):
 
 try:
     app = httpx.Client(base_url="http://127.0.0.1:8799", timeout=60, headers={"X-KeiroLake-Token": "frozen-token"})
-    for _ in range(90):
+    started = time.time()
+    while True:  # a first start unpacks the one-file engine, which is slow on small CI machines
         try:
             if app.get("/api/net").status_code == 200:
+                print(f"Engine up after {time.time() - started:.0f} s")
                 break
         except httpx.HTTPError:
-            time.sleep(1)
+            pass
+        if proc.poll() is not None:
+            print(f"Engine exited with code {proc.returncode}. Its output:\n{engine_log()}")
+            sys.exit(1)
+        if time.time() - started > 300:
+            print(f"Engine not answering after 300 s. Its output:\n{engine_log()}")
+            sys.exit(1)
+        time.sleep(1)
     want = json.loads((Path(__file__).resolve().parents[1] / "desktop/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))["version"]
     check("version", app.get("/api/about").json()["version"] == want, want)
     check("bundled UI served at /", "<div id=\"root\">" in httpx.get("http://127.0.0.1:8799/").text)
