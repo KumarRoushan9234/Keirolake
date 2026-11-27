@@ -285,7 +285,34 @@ TOOLS = [
               "inputSchema": {"type": "object", "properties": {}}}),
     ("write", {"name": "build_topic", "description": "Start gathering a new topic from the web into a cleaned table and searchable pages.",
                "inputSchema": {"type": "object", "required": ["name"], "properties": {"name": {"type": "string"}, "question": {"type": "string"}}}}),
+    ("read", {"name": "overview", "description": "Start here. What's in the lake (collections, tables, topics) and which tools this key can use.",
+              "inputSchema": {"type": "object", "properties": {}}}),
+    ("read", {"name": "job_status", "description": "Progress and result of a job started by this key (capture, plan_table, fill_table, add_document, build_topic).",
+              "inputSchema": {"type": "object", "required": ["job_id"], "properties": {"job_id": {"type": "string"}}}}),
+    ("write", {"name": "capture", "description": "Save a note, or a web link as its readable page, into the user's Captured collection.",
+               "inputSchema": {"type": "object", "required": ["text"], "properties": {
+                   "text": {"type": "string", "description": "A note, or one https:// link"}, "title": {"type": "string"}}}}),
+    ("write", {"name": "plan_table", "description": "Design a new table by describing it, for example 'every Indian state with its capital and population'. "
+                                                    "KeiroLake's model proposes the columns. Call again with session_id to change the plan, then fill_table.",
+               "inputSchema": {"type": "object", "required": ["description"], "properties": {
+                   "description": {"type": "string"}, "session_id": {"type": "string", "description": "Continue an earlier plan"}}}}),
+    ("write", {"name": "fill_table", "description": "Create the planned table and fill it with rows, each with a source and a confidence. Returns a job id.",
+               "inputSchema": {"type": "object", "required": ["session_id"], "properties": {
+                   "session_id": {"type": "string"}, "rows": {"type": "integer", "minimum": 1, "maximum": 200}}}}),
+    ("llm", {"name": "list_models", "description": "The AI models this lake can answer with: models on the user's computer, cloud models and 'lake' (answers from the user's data).",
+             "inputSchema": {"type": "object", "properties": {}}}),
 ]
+READ_ONLY = {"list_knowledge_bases", "search", "list_datasets", "ask", "query_sql", "list_tables", "read_rows", "search_table",
+             "list_topics", "overview", "job_status", "list_models"}
+for _scope, _tool in TOOLS:
+    _tool["annotations"] = {"readOnlyHint": _tool["name"] in READ_ONLY, "destructiveHint": False,
+                            "openWorldHint": _tool["name"] in ("ask", "build_topic", "capture")}
+INSTRUCTIONS = """KeiroLake is the user's private data lake on their own computer: collections of documents (searchable by meaning),
+tables (SQL with sources for each cell), topics gathered from the web, and offline libraries such as Wikipedia.
+Call overview first to see what exists. Use ask for a cited answer, search for passages, and list_tables, read_rows or
+query_sql for tables. To build a dataset: plan_table with a description, adjust it by calling plan_table again with the
+session_id, then fill_table, and follow it with job_status. Save things for the user with capture.
+Always cite the titles and URLs that results return. Tools are limited to this key's permissions."""
 
 
 def _rpc(id_, result=None, error: tuple[int, str] | None = None) -> dict:
@@ -321,6 +348,8 @@ async def _call_tool(key: dict, name: str, args: dict) -> str:
         return json.dumps({"columns": result["columns"], "rows": result["rows"]}, default=str)
     if name in ("list_tables", "read_rows", "search_table", "insert_rows", "update_row", "list_topics", "build_topic"):
         return await _table_tool(key, name, args)
+    if name in ("overview", "job_status", "capture", "plan_table", "fill_table", "list_models"):
+        return await _assistant_tool(key, name, args)
     kb = kb_for(key, str(args.get("kb", "")))
     job_id = runner.submit("ingest", f"API ({key['name']}): {str(args.get('title'))[:60]}",
                            ingest_web.text_job(kb["id"], str(args.get("title", ""))[:300], str(args.get("text", ""))))
@@ -358,6 +387,99 @@ async def _table_tool(key: dict, name: str, args: dict) -> str:
         raise HTTPException(400, str(exc)) from exc
 
 
+def _job_title(key: dict, what: str) -> str:
+    return f"API ({key['name']}): {what}"[:200]
+
+
+def _job_view(key: dict, job_id: str) -> dict:
+    from app.catalog.models import Job
+
+    with session_scope() as s:
+        j = s.get(Job, job_id)
+        if j is None or not (j.title or "").startswith(f"API ({key['name']})"):
+            raise HTTPException(404, "No job with that id for this key")
+        return {"id": j.id, "title": j.title, "status": j.status, "progress": j.progress, "message": j.message}
+
+
+async def _wait_job(key: dict, job_id: str, seconds: float) -> dict:
+    import asyncio
+
+    view = _job_view(key, job_id)
+    for _ in range(int(seconds * 2)):
+        if view["status"] in ("done", "failed", "cancelled"):
+            break
+        await asyncio.sleep(0.5)
+        view = _job_view(key, job_id)
+    return view
+
+
+async def _assistant_tool(key: dict, name: str, args: dict) -> str:
+    from app import builder_sessions as sessions
+    from app import inbox
+
+    if name == "overview":
+        from app import topics
+        from app.sheets import service as sheet_service
+
+        return json.dumps({
+            "collections": [{"id": k["id"], "name": k["name"]} for k in allowed_kbs(key)],
+            "tables": [{"id": t["id"], "name": t["name"], "rows": t["rows"]} for t in sheet_service.list_sheets()][:100],
+            "topics": [{"id": t["id"], "name": t["name"], "status": t["status"]} for t in topics.list_all()][:50],
+            "tools": [t["name"] for scope, t in TOOLS if scope in key["scopes"]],
+            "permissions": key["scopes"],
+        }, default=str)
+    if name == "job_status":
+        return json.dumps(_job_view(key, str(args.get("job_id", ""))), default=str)
+    if name == "list_models":
+        from app.api.gateway_routes import models
+
+        return json.dumps([m["id"] for m in (await models(key))["data"]])
+    if name == "capture":
+        text = str(args.get("text", ""))
+        try:
+            job, _ = await inbox.text_or_link_job(text, str(args.get("title") or ""))
+        except Exception as exc:  # noqa: BLE001 - an unreadable or private link, or nothing to save
+            raise HTTPException(400, str(exc)) from exc
+        kind = "Link" if inbox.URL_RE.match(text.strip()) else "Note"
+        return json.dumps({"job_id": runner.submit("capture", _job_title(key, kind), job, lane="background"), "saved_to": "Captured"})
+    try:
+        if name == "plan_table":
+            sid = str(args.get("session_id") or "") or sessions.create("table")["id"]
+            job = sessions.say_job(sid, str(args.get("description", "")))
+            job_id = runner.submit("builder", _job_title(key, "plan a table"), job, lane="background")
+            view = await _wait_job(key, job_id, 90)
+            s = sessions.get(sid)
+            reply = next((m["content"] for m in reversed(s["messages"]) if m["role"] == "assistant"), "")
+            ready = bool(s.get("ready"))
+            return json.dumps({"session_id": sid, "status": view["status"], "reply": reply, "plan": s.get("draft"),
+                               "ready_to_fill": ready, "error": s.get("error") or None,
+                               "next": "Call fill_table with this session_id" if ready
+                               else "Answer the reply with plan_table and this session_id"}, default=str)
+        sid = str(args.get("session_id", ""))
+        job, s = sessions.fill_job(sid, int(args.get("rows") or 20))
+        job_id = runner.submit("builder", _job_title(key, f"build {s['draft']['name']}"), job, lane="background")
+        return json.dumps({"job_id": job_id, "table": s["draft"]["name"], "next": "Check progress with job_status"})
+    except sessions.SessionError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+def link_caller(secret: str, request: Request) -> dict:
+    """The key inside a connector link (/mcp/k/<key>), for AI apps that can't send an Authorization header, such as
+    Claude.ai and ChatGPT connectors. Same checks as a header; the access log never stores the key."""
+    key = access.verify(secret)
+    if key is None:
+        raise HTTPException(401, "This connector link's key is wrong, revoked or expired")
+    if not access.rate_ok(key["id"]):
+        raise HTTPException(429, f"Too many requests: at most {access.RATE_PER_MINUTE} a minute per key")
+    request.state.api_key = key
+    return key
+
+
+@mcp_router.post("/mcp/k/{secret}")
+async def mcp_by_link(secret: str, request: Request):
+    return await mcp(request, link_caller(secret, request))
+
+
 @mcp_router.post("/mcp")
 async def mcp(request: Request, key: dict = Depends(caller)):
     try:
@@ -373,7 +495,7 @@ async def mcp(request: Request, key: dict = Depends(caller)):
         return _rpc(id_, {"protocolVersion": params.get("protocolVersion") or "2025-06-18",
                           "capabilities": {"tools": {"listChanged": False}},
                           "serverInfo": {"name": "keirolake", "version": APP_VERSION},
-                          "instructions": "Search, ask and query the user's own KeiroLake data. Cite titles and URLs from results."})
+                          "instructions": INSTRUCTIONS})
     if method == "ping":
         return _rpc(id_, {})
     if method == "tools/list":

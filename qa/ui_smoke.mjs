@@ -8,7 +8,7 @@ import puppeteer from "puppeteer-core";
 
 const base = process.argv[2] ?? "http://127.0.0.1:4173";
 const outFile = process.argv.includes("--json") ? process.argv[process.argv.indexOf("--json") + 1] : null;
-const PAGES = ["Home", "Ask", "Capture", "Map", "Topics", "Build with AI", "Tables", "Collections", "Files", "Data tools", "Libraries", "Vault", "API keys", "LLM gateway", "Sharing", "Webhooks", "Models", "Jobs", "Settings", "Troubleshoot"];
+const PAGES = ["Home", "Ask", "Capture", "Map", "Topics", "Build with AI", "Tables", "Collections", "Files", "Data tools", "Libraries", "Vault", "AI apps", "API keys", "LLM gateway", "Sharing", "Webhooks", "Models", "Jobs", "Settings", "Docs", "Troubleshoot"];
 const WIDTHS = [375, 768, 1280, 1920];
 const BROWSERS = [
   process.env.BROWSER_PATH,

@@ -235,7 +235,10 @@ flowchart TB
 
 - **OpenAI-compatible endpoint:** any OpenAI SDK, LangChain, LlamaIndex or agent framework, by changing the base URL.
 - **Tables as a database:** read, filter, sort, add and change rows over HTTP; search a table by meaning; saved views as JSON, CSV or JSON Lines.
-- **MCP server:** tools to list and search collections, read and write tables, run read-only SQL and build topics. The tools a client sees depend on its key.
+- **MCP server:** 19 tools to search, ask, read and write tables, run read-only SQL, build a table by describing it,
+  capture notes and links, and build topics. The tools a client sees depend on its key.
+- **Claude, ChatGPT, Cursor and VS Code:** Serve → AI apps adds KeiroLake to Claude Desktop in one click, and gives a
+  ready setup for the others ([how](docs/guide.md#use-it-from-claude-chatgpt-cursor-or-vs-code)).
 - **Webhooks:** signed calls when imports finish or tables are created.
 
 ```bash

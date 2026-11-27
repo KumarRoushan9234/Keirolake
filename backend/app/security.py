@@ -55,7 +55,8 @@ class TokenMiddleware(BaseHTTPMiddleware):
         if public:
             response = await call_next(request)
             client = request.client.host if request.client else ""
-            access.record(getattr(request.state, "api_key", None), request.method, path, response.status_code, client)
+            logged = "/mcp/k/…" if path.startswith("/mcp/k/") else path  # a connector link carries the key
+            access.record(getattr(request.state, "api_key", None), request.method, logged, response.status_code, client)
             return response
         if path.startswith("/api") and request.client and not network.is_loopback(request.client.host):
             return JSONResponse({"detail": "The app API is only available on this computer"}, status_code=403)

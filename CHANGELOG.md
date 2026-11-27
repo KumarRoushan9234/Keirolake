@@ -5,6 +5,23 @@ automatic release.
 
 ## Unreleased
 
+**Use the lake from Claude, ChatGPT, Cursor and VS Code**
+- Serve → AI apps: one click adds KeiroLake to Claude Desktop; ready setups for Claude Code, Cursor and VS Code, and a
+  connector link for Claude.ai and ChatGPT over the internet link. Each app gets its own key.
+- A built-in MCP bridge (`keirolake-desktop mcp`) that starts KeiroLake in the tray when an AI app needs it.
+- New MCP tools: overview, plan_table and fill_table (Build with AI from Claude), capture, job_status and list_models.
+
+**Docs and logs in the app**
+- System → Docs: the user guide, the MCP tool list, the data API reference and live logs, with keys removed.
+
+**Fixes**
+- After an update on Windows the app could show "The engine stopped (exit code: 3)": the old engine kept running and
+  held the sharing port. The app now stops the engine's whole process tree, the engine stops itself when the app is
+  gone, and a busy port turns sharing off with a message instead of stopping the engine.
+
+**Installer**
+- A KeiroLake and KeiroLabs branded Windows installer, with a welcome page, a progress page and a finish page with links.
+
 - Intel Mac builds work again (the engine no longer stops at start because of a mismatched OpenSSL).
 - A project website: https://kumarroushan9234.github.io/Keirolake/
 

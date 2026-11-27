@@ -278,6 +278,11 @@ async def start() -> None:
         if not auth.has_password():
             _error = "Set a password before opening a port to the internet"
             return
+    host = bind_address() if mode() in ("lan", "open") else "127.0.0.1"
+    if port_busy(host, port()):
+        _error = f"Port {port()} is already in use by another program (or a copy of KeiroLake still running). Pick another port, or restart the computer."
+        log.warning(_error)
+        return
     try:
         if mode() in ("lan", "open"):
             cert, key = own_cert() or await asyncio.to_thread(ensure_cert)
@@ -286,7 +291,7 @@ async def start() -> None:
         else:
             config = uvicorn.Config(tagged(app), host="127.0.0.1", port=port(), log_level="warning", access_log=False, lifespan="off")
         _server = _Quiet(config)
-        _task = asyncio.create_task(_server.serve())
+        _task = asyncio.create_task(serve_quietly(_server))
         _error = ""
         await asyncio.sleep(0.5)
         if _task.done() and _task.exception():
@@ -299,6 +304,25 @@ async def start() -> None:
         log.warning(_error)
         _server, _task = None, None
 
+
+
+def port_busy(host: str, port_: int) -> bool:
+    """True when another program (or a copy of KeiroLake left running) already listens on the port."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        try:
+            probe.bind((host, port_))
+        except OSError:
+            return True
+    return False
+
+
+async def serve_quietly(server) -> None:
+    """Run an extra uvicorn server inside the engine. uvicorn ends a failed start with SystemExit, which would stop the
+    whole engine from inside a task; turn it into an ordinary error so only this listener fails."""
+    try:
+        await server.serve()
+    except SystemExit as exc:
+        raise OSError(f"the server couldn't start (exit {exc.code})") from None
 
 async def _map_port() -> None:
     from app import upnp

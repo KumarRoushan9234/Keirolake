@@ -27,6 +27,7 @@ from app.api.table_routes import router as table_router
 from app.api.lake_routes import router as lake_router
 from app.api.builder_routes import router as builder_router
 from app.api.capture_routes import router as capture_router
+from app.api.connect_routes import router as connect_router
 from app.api.datatool_routes import router as datatool_router
 from app.api.public_routes import mcp_router, router as public_router
 from app.api.access_routes import router as access_router
@@ -43,6 +44,9 @@ from app.security import TokenMiddleware
 from app.watch import watch_loop
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+# Every outgoing request (health checks every few seconds) is noise in the log; failures still show as warnings.
+for _quiet in ("httpx", "httpcore"):
+    logging.getLogger(_quiet).setLevel(logging.WARNING)
 log = logging.getLogger("keirolake")
 
 # Settings saved in the app override .env; apply them before anything reads config.
@@ -102,6 +106,9 @@ async def _seed_samples() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    from app import lifeline
+
+    lifeline.start_from_env()
     ensure_zones()
     init_db()
     runner.start()
@@ -153,7 +160,8 @@ app = FastAPI(title="KeiroLake", version=APP_VERSION, lifespan=lifespan,
 
 @app.exception_handler(Exception)
 async def unexpected(request: Request, exc: Exception):
-    log.exception("Unhandled error on %s %s", request.method, request.url.path)
+    path = "/mcp/k/…" if request.url.path.startswith("/mcp/k/") else request.url.path  # never log a connector key
+    log.exception("Unhandled error on %s %s", request.method, path)
     return JSONResponse({"detail": f"Something went wrong: {type(exc).__name__}: {str(exc)[:300]}"}, status_code=500)
 
 
@@ -175,6 +183,7 @@ app.include_router(table_router)
 app.include_router(lake_router)
 app.include_router(builder_router)
 app.include_router(capture_router)
+app.include_router(connect_router)
 app.include_router(datatool_router)
 app.include_router(model_router)
 app.include_router(opendata_router)

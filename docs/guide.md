@@ -16,11 +16,13 @@ How each part of KeiroLake works, with the details the [README](../README.md) le
 - [Models](#models): [quantized](#quantized-models) and [Heretic](#heretic-models)
 - [Sharing](#sharing): [over the internet](#over-the-internet), [your own address](#your-own-address),
   [stay reachable](#stay-reachable-when-youre-away)
+- [Use it from Claude, ChatGPT, Cursor or VS Code](#use-it-from-claude-chatgpt-cursor-or-vs-code)
 - [Use it from your own apps](#use-it-from-your-own-apps)
 - [Backups](#backups)
 - [Updates](#updates)
 - [Other ways to run it](#other-ways-to-run-it): [headless server](#headless-server), [Docker](#docker), [phone app](#as-an-app-on-your-phone-or-another-computer), [Capture](#capture-from-your-phone), [command line](#command-line)
 - [Keyboard and display](#keyboard-and-display)
+- [Docs and logs](#docs-and-logs)
 - [Troubleshooting](#troubleshooting)
 
 ## Getting started
@@ -340,6 +342,38 @@ The token is kept with your other secrets in the system keychain. **Go back to t
   then restart `systemd-logind`.
 - Keep a closed laptop somewhere it can breathe: it gets warm.
 
+## Use it from Claude, ChatGPT, Cursor or VS Code
+
+**Serve → AI apps** connects an AI app to your lake through MCP. Pick the app and what it may do (`read`, `ask`,
+`write`, `llm`, `sql`); each app gets its own key, so you can revoke one without touching the others.
+
+| App | How it connects |
+|---|---|
+| **Claude Desktop** | Click **Add to Claude Desktop**, then quit Claude Desktop (also from the tray) and open it again. KeiroLake adds itself to Claude's config and keeps a backup of the old one next to it. |
+| **Claude Code** | Run the `claude mcp add …` command shown. |
+| **Cursor**, **VS Code** | Paste the JSON shown into `~/.cursor/mcp.json` or `.vscode/mcp.json`. |
+| **Claude.ai**, **ChatGPT** | Turn on the [internet link](#over-the-internet) first. Then in Claude.ai: *Settings → Connectors → Add custom connector*; in ChatGPT: *Settings → Apps & Connectors → Advanced → Developer mode → Create*, with *No authentication*. Paste the connector link shown. |
+
+Claude Desktop, Claude Code, Cursor and VS Code start KeiroLake's own MCP bridge (`keirolake-desktop mcp`) on this
+computer. It finds the running app by itself and starts it in the tray if it isn't running, so nothing needs to be open
+to the network. The connector link for Claude.ai and ChatGPT carries the key inside it: treat it like a password, and
+revoke the key under **API keys** to cut access. KeiroLake never writes that key to its logs.
+
+What an AI app can do, depending on its permissions:
+
+| Tool | Does |
+|---|---|
+| `overview` | What's in the lake; a good first call |
+| `ask`, `search` | Cited answers and passages from your collections and libraries |
+| `list_tables`, `read_rows`, `search_table`, `query_sql` | Read your tables |
+| `plan_table`, `fill_table`, `job_status` | Build a new table by describing it, the same as Build with AI |
+| `capture` | Save a note or a link into Captured |
+| `insert_rows`, `update_row`, `add_document`, `build_topic` | Add data |
+| `list_models` | The models your lake can answer with |
+
+Try asking Claude: *"What's in my KeiroLake?"*, *"Build me a table of the 10 largest Indian cities with population and
+state"*, or *"Save this link to my lake"*.
+
 ## Use it from your own apps
 
 ![LLM gateway](screenshots/llm-gateway.png)
@@ -387,7 +421,9 @@ Index a table once with `POST /v1/tables/<id>/index` to search it by meaning.
 
 **MCP:** connect any MCP client to `<your address>/mcp` with the header `Authorization: Bearer klk_...`. The tools a
 client sees depend on the key's permissions: `list_knowledge_bases`, `search`, `list_datasets`, `query_sql`,
-`list_tables`, `read_rows`, `search_table`, `insert_rows`, `update_row`, `list_topics` and `build_topic`.
+`list_tables`, `read_rows`, `search_table`, `insert_rows`, `update_row`, `list_topics`, `build_topic`, `overview`,
+`job_status`, `capture`, `plan_table`, `fill_table` and `list_models`. Apps that can't send a header use the
+connector link `<your address>/mcp/k/<key>` instead.
 
 **Webhooks:** get a signed call (HMAC-SHA256 in `X-KeiroLake-Signature`) when an import finishes, a pipeline finishes or a
 table is created.
@@ -508,6 +544,12 @@ The CLI finds a running `keirolake serve` by itself. For another engine set `KEI
 The sliders icon (top right) sets the text size, theme (light, dark or system), accent colour (blue, violet, green,
 orange or rose), high contrast and reduced motion. Home's **Customise** shows, hides and reorders its panels. The layout works
 from phone width up.
+
+## Docs and logs
+
+**System → Docs** has this guide, the list of MCP tools, the data API reference and the logs (engine, vector database
+and Ollama), all offline. The log view refreshes every few seconds, can be filtered (try `error`), and never shows keys
+or tokens. To send logs with a question, use **Troubleshoot → Support bundle**.
 
 ## Troubleshooting
 

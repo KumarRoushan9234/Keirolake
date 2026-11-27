@@ -1,8 +1,8 @@
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import {
-  Books, BookOpen, Broadcast, CaretRight, ChatCircleText, Cpu, Database, FolderOpen, GearSix, HardDrives, House, Key, Lightbulb, List,
-  LockKey, MagnifyingGlass, PlusCircle, Sparkle, Toolbox, Plug, Queue, ShareNetwork, SidebarSimple, SquaresFour, Table, TreeStructure, WebhooksLogo, Wrench,
+  BookOpenText, Books, BookOpen, Broadcast, CaretRight, ChatCircleText, Cpu, Database, FolderOpen, GearSix, HardDrives, House, Key, Lightbulb, List,
+  LockKey, MagnifyingGlass, PlusCircle, Sparkle, Toolbox, Plug, Queue, ShareNetwork, SidebarSimple, SquaresFour, Table, TreeStructure, WebhooksLogo, Wrench, Robot,
 } from "@phosphor-icons/react";
 import { ComponentType, lazy, StrictMode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -31,6 +31,8 @@ const Files = lazy(() => import("./pages/Files"));
 const DataTools = lazy(() => import("./pages/DataTools"));
 const Builder = lazy(() => import("./pages/Builder"));
 const Capture = lazy(() => import("./pages/Capture"));
+const AiApps = lazy(() => import("./pages/AiApps"));
+const Docs = lazy(() => import("./pages/Docs"));
 const data = () => import("./pages/DataPages");
 const serve = () => import("./pages/ServePages");
 const Topics = lazy(() => data().then((m) => ({ default: m.TopicsPage })));
@@ -64,6 +66,7 @@ const SECTIONS: (NavSection & { pages: Entry[] })[] = [
     { id: "Vault", label: "Vault", icon: LockKey, el: Vault },
   ] },
   { id: "serve", label: "Serve", icon: Broadcast, pages: [
+    { id: "AiApps", label: "AI apps", icon: Robot, el: AiApps },
     { id: "Keys", label: "API keys", icon: Key, el: Keys },
     { id: "Gateway", label: "LLM gateway", icon: Plug, el: Gateway },
     { id: "Sharing", label: "Sharing", icon: ShareNetwork, el: Sharing },
@@ -73,6 +76,7 @@ const SECTIONS: (NavSection & { pages: Entry[] })[] = [
     { id: "Models", label: "Models", icon: Cpu, el: Models },
     { id: "Jobs", label: "Jobs", icon: Queue, el: Jobs },
     { id: "Settings", label: "Settings", icon: GearSix, el: Settings },
+    { id: "Docs", label: "Docs", icon: BookOpenText, el: Docs },
     { id: "Troubleshoot", label: "Troubleshoot", icon: Wrench, el: Troubleshoot },
   ] },
 ];
@@ -180,6 +184,8 @@ function App() {
     { id: "sheet-import", label: "Import a file into a sheet", run: () => go({ page: "Lake", params: { new: "import" } }) },
     { id: "sheet-describe", label: "Build a sheet from a description", hint: "KeiroLabs", run: () => go({ page: "Lake", params: { new: "describe" } }) },
     { id: "api-key", label: "Make an API key for an app", run: () => go({ page: "Connect" }) },
+    { id: "ai-apps", label: "Connect Claude, ChatGPT, Cursor or VS Code", run: () => go({ page: "AiApps" }) },
+    { id: "logs", label: "Logs", run: () => go({ page: "Docs" }) },
     { id: "backup", label: "Backups and copies", run: () => go({ page: "Settings", params: { section: "data" } }) },
     { id: "network", label: "Open the lake to other devices", run: () => go({ page: "Settings", params: { section: "network" } }) },
     { id: "text-up", label: "Larger text", hint: "Ctrl +", run: () => display.step(1) },

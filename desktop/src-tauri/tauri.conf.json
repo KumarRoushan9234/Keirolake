@@ -53,7 +53,11 @@
       "nsis": {
         "installMode": "currentUser",
         "displayLanguageSelector": false,
-        "startMenuFolder": "KeiroLake"
+        "startMenuFolder": "KeiroLake",
+        "template": "windows/installer.nsi",
+        "sidebarImage": "windows/sidebar.bmp",
+        "headerImage": "windows/header.bmp",
+        "installerIcon": "icons/icon.ico"
       },
       "webviewInstallMode": {
         "type": "downloadBootstrapper",
@@ -62,7 +66,8 @@
     },
     "macOS": {
       "minimumSystemVersion": "11.0"
-    }
+    },
+    "copyright": "© 2026 KeiroLabs · KeiroLake · MIT licensed"
   },
   "plugins": {
     "updater": {

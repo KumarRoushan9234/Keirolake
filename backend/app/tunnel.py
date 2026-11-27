@@ -150,8 +150,11 @@ async def _start_listener() -> None:
         def capture_signals(self):
             yield
 
+    if network.port_busy("127.0.0.1", tunnel_port()):
+        raise TunnelError(f"Port {tunnel_port()} on this computer is in use by another program (or a copy of KeiroLake still running). "
+                          "Pick another port for the link, or restart the computer.")
     _listener = _Quiet(uvicorn.Config(network.tagged(app), host="127.0.0.1", port=tunnel_port(), log_level="warning", access_log=False, lifespan="off"))
-    _listener_task = asyncio.create_task(_listener.serve())
+    _listener_task = asyncio.create_task(network.serve_quietly(_listener))
     await asyncio.sleep(0.5)
     if _listener_task.done():
         exc = _listener_task.exception()

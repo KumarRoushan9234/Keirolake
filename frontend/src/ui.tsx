@@ -2,7 +2,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, u
 import { api, errText, Job, waitJob } from "./api";
 
 export type Page = "Home" | "Ask" | "Map" | "Topics" | "Tables" | "Collections" | "Files" | "DataTools" | "Builder" | "Capture" | "Libraries" | "Vault" | "Keys" | "Gateway" | "Sharing"
-  | "Webhooks" | "Models" | "Jobs" | "Settings" | "Troubleshoot" | "Reader";
+  | "Webhooks" | "Models" | "Jobs" | "Settings" | "Troubleshoot" | "Reader" | "AiApps" | "Docs";
 export type NavTarget = { page: Page | string; params?: Record<string, string> };
 
 export const NavContext = createContext<{

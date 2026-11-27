@@ -24,6 +24,7 @@ SECRET_PATTERNS = [
     re.compile(r"gsk_[A-Za-z0-9]{16,}"), re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
     re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._\-]{12,}"), re.compile(r"(?i)(api[_-]?key[\"'=:\s]+)[A-Za-z0-9._\-]{12,}"),
     re.compile(r"(?i)(x-keirolake-token[\"'=:\s]+)[A-Za-z0-9]{12,}"), re.compile(r"/api/zim/[0-9a-f]{32}/"),
+    re.compile(r"(klk_)[A-Za-z0-9_\-]{8,}"), re.compile(r"(/mcp/k/)[^\s/\"']+"),
 ]
 
 

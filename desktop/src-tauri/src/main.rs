@@ -15,6 +15,8 @@
 //! (scheduled refreshes, running jobs, the data API). Only Quit stops everything. It starts at login,
 //! hidden in the tray, and a second launch just brings the running window forward.
 
+mod mcp_bridge;
+
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
@@ -179,6 +181,8 @@ fn spawn_engine(l: &Launch) -> Result<Child, String> {
     cmd.env("KEIROLAKE_TOKEN", &l.token)
         .env("KEIROLAKE_PORT", l.port.to_string())
         .env("KEIROLAKE_SUPERVISED", "1")
+        .env("KEIROLAKE_PARENT_PID", std::process::id().to_string())
+        .env("KEIROLAKE_APP_EXE", std::env::current_exe().unwrap_or_default())
         .env("KEIROLAKE_APP_VERSION", env!("CARGO_PKG_VERSION"))
         .env("DATA_DIR", &l.data_dir)
         .env("PYTHONIOENCODING", "utf-8")
@@ -189,7 +193,31 @@ fn spawn_engine(l: &Launch) -> Result<Child, String> {
         Some((http, _)) => cmd.env("QDRANT_URL", format!("http://127.0.0.1:{http}")).env_remove("QDRANT_PATH"),
         None => cmd.env("QDRANT_PATH", l.data_dir.join("qdrant")),
     };
+    #[cfg(unix)]
+    {
+        // Its own process group, so stopping it also stops the packaged engine's inner process.
+        use std::os::unix::process::CommandExt;
+        cmd.process_group(0);
+    }
     hide_window(&mut cmd).spawn().map_err(|e| format!("Couldn't start the engine: {e}"))
+}
+
+/// Stop a sidecar and everything it started. The packaged engine is a launcher plus the real engine; killing only the
+/// launcher left the engine running with its ports held, so the next start (after an update) failed.
+fn kill_tree(mut child: Child) {
+    #[cfg(windows)]
+    {
+        let _ = hide_window(Command::new("taskkill").args(["/PID", &child.id().to_string(), "/T", "/F"]))
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+    }
+    #[cfg(unix)]
+    {
+        let _ = Command::new("kill").args(["-KILL", "--", &format!("-{}", child.id())]).stderr(Stdio::null()).status();
+    }
+    let _ = child.kill();
+    let _ = child.wait();
 }
 
 fn wait_engine(app: &tauri::AppHandle, l: &Launch) -> Result<(), String> {
@@ -197,6 +225,7 @@ fn wait_engine(app: &tauri::AppHandle, l: &Launch) -> Result<(), String> {
     let state = app.state::<Shared>();
     while started.elapsed() < Duration::from_secs(120) {
         if http_ok(l.port, "/api/net", &l.token) {
+            mcp_bridge::write_address(&l.data_dir, l.port);
             state.0.lock().unwrap().ready = true;
             return Ok(());
         }
@@ -550,9 +579,7 @@ fn stop_children(app: &tauri::AppHandle) {
         let mut s = state.0.lock().unwrap();
         s.stopping = true;
         for child in [s.engine.take(), s.qdrant.take()].into_iter().flatten() {
-            let mut child = child;
-            let _ = child.kill();
-            let _ = child.wait();
+            kill_tree(child);
         }
     }
 }
@@ -598,6 +625,10 @@ fn window_theme(app: tauri::AppHandle, dark: bool) {
 }
 
 fn main() {
+    // `keirolake-desktop mcp`: a stdio MCP server for Claude Desktop and similar apps, without opening a window here.
+    if std::env::args().nth(1).as_deref() == Some("mcp") {
+        std::process::exit(mcp_bridge::run());
+    }
     #[cfg(target_os = "linux")]
     std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
 
