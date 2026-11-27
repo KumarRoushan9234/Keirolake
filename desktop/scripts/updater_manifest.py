@@ -17,7 +17,7 @@ def main(version: str, repo: str, folder: Path) -> int:
     base = f"https://github.com/{repo}/releases/download/v{version}"
     platforms = {}
     required = {"windows-x86_64": f"KeiroLake_{version}_x64-setup.exe", "linux-x86_64": f"KeiroLake_{version}_amd64.AppImage"}
-    optional = {"darwin-aarch64": f"KeiroLake_{version}_aarch64.app.tar.gz", "darwin-x86_64": f"KeiroLake_{version}_x86_64.app.tar.gz"}
+    optional = {"darwin-aarch64": f"KeiroLake_{version}_aarch64.app.tar.gz"}
     for key, pattern in {**required, **optional}.items():
         file, sig = folder / pattern, folder / f"{pattern}.sig"
         if not (file.exists() and sig.exists()):

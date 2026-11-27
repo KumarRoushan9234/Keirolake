@@ -22,7 +22,7 @@ automatic release.
 **Installer**
 - A KeiroLake and KeiroLabs branded Windows installer, with a welcome page, a progress page and a finish page with links.
 
-- Intel Mac builds work again (the engine no longer stops at start because of a mismatched OpenSSL).
+- macOS releases are for Apple Silicon Macs only. Intel Macs are no longer built.
 - A project website: https://kumarroushan9234.github.io/Keirolake/
 
 ## 0.9.0

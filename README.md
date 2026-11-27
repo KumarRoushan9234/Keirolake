@@ -75,7 +75,6 @@ version updates itself from Settings → Updates, checked against the project's 
 | -------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | **Windows 10 / 11** (x64)        | [Installer (.exe)](https://github.com/KumarRoushan9234/Keirolake/releases/latest) | Run it. If SmartScreen warns (not code-signed yet): **More info → Run anyway**.                             |
 | **macOS 11+, Apple Silicon**     | [aarch64 .dmg](https://github.com/KumarRoushan9234/Keirolake/releases/latest)     | Open it, drag KeiroLake to Applications. First launch: **right-click → Open** (not notarized yet).          |
-| **macOS 11+, Intel**             | [x86_64 .dmg](https://github.com/KumarRoushan9234/Keirolake/releases/latest)      | Same as above.                                                                                              |
 | **Ubuntu / Debian**              | [.deb](https://github.com/KumarRoushan9234/Keirolake/releases/latest)             | `sudo apt install ./KeiroLake_*_amd64.deb`. Updates install from the app with your password.                |
 | **Fedora / RHEL / openSUSE**     | [.rpm](https://github.com/KumarRoushan9234/Keirolake/releases/latest)             | `sudo dnf install ./KeiroLake-*.x86_64.rpm`. Updates install from the app with your password.               |
 | **Any Linux**                    | [AppImage](https://github.com/KumarRoushan9234/Keirolake/releases/latest)         | `chmod +x KeiroLake_*.AppImage`, then run it.                                                               |
@@ -309,7 +308,7 @@ no repository scripts). Details in [SECURITY.md](SECURITY.md).
 | Any Linux (AppImage)              | Supported | Started on a clean Ubuntu 22.04 and checked the same way                                                             |
 | Fedora / RHEL / openSUSE (.rpm)   | Built     | Package contents and dependencies checked; not yet installed on a Fedora machine                                     |
 | Headless server / Docker          | Supported | `keirolake serve` and the container tested with sign-in, API keys and the CLI                                        |
-| macOS 11+ (Apple Silicon, Intel)  | Built     | Built and engine-tested on GitHub's Mac machines every release; not yet tried on a real Mac by the maintainer        |
+| macOS 11+ (Apple Silicon)         | Built     | Built and engine-tested on GitHub's Mac machines every release; not yet tried on a real Mac by the maintainer        |
 | ARM Linux, Windows on ARM         | Not yet   | Not built                                                                                                            |
 
 Linux packages are built on Ubuntu 22.04 (glibc 2.35), so they install on most current distributions. Every release
@@ -323,7 +322,7 @@ installs it (automatically if you choose). Windows, macOS and the AppImage repla
 `keirolake update`.
 
 **For the maintainer:** every push to `main` runs [`release.yml`](.github/workflows/release.yml): engine tests and an
-interface build, then the Windows installer, the Mac apps (Apple Silicon and Intel) and the Linux packages are built,
+interface build, then the Windows installer, the Mac app (Apple Silicon) and the Linux packages are built,
 each tested, signed for the updater and published as a release with `latest.json`. A failed Mac build is left out
 instead of blocking the release. The version is the one in the repo, or one patch above the last
 release. Bump minor or major with `python desktop/scripts/set_version.py 0.9.0`; skip a release with `[skip release]`

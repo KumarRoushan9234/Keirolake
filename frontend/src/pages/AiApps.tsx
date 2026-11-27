@@ -10,8 +10,8 @@ type Result = { raw_key: string; key: { name: string; scopes: string[] }; bridge
   setups: { "claude-desktop": string; "claude-code": string; cursor: string; vscode: string; connector_url: string; http_url: string; remote?: string } };
 
 const APPS: [string, string, string][] = [
-  ["claude-desktop", "Claude Desktop", "One click, on this computer"],
-  ["claude-code", "Claude Code", "One command"],
+  ["claude-desktop", "Claude Desktop", "Chat, one click"],
+  ["claude-code", "Claude Code", "Terminal, IDE and the Code tab"],
   ["claude-web", "Claude.ai", "Over the internet link"],
   ["chatgpt", "ChatGPT", "Over the internet link"],
   ["cursor", "Cursor", "On this computer"],
@@ -92,7 +92,8 @@ function Setup({ app, r }: { app: string; r: Result }) {
           <>
             <p className="field-ok" role="status">Added to Claude Desktop. {r.installed.restart}</p>
             <p className="text-xs text-text-muted">Config: <span className="mono">{r.installed.path}</span> (the previous one is kept as a backup next to it)</p>
-            <p>Then ask Claude something like <em>"What's in my KeiroLake?"</em></p>
+            <p>Then, in a new Claude chat, ask something like <em>"What's in my KeiroLake?"</em></p>
+            <p className="text-xs text-text-muted">This adds KeiroLake to Claude Desktop's chats. Claude Code (including the Code tab in Claude Desktop) keeps its own list: use the Claude Code tile for it.</p>
           </>
         )}
         {app === "claude-code" && (<><p>Run this in a terminal:</p><CopyBox text={s["claude-code"]} label="command" /></>)}

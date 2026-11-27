@@ -78,7 +78,7 @@ Nothing long-running belongs to a page.
 - **Everyone else:** `GET /api/updates` (`app/updates.py`) reads the GitHub Releases API, cached for six hours.
 - **Publishing:** `.github/workflows/release.yml` runs on every push to `main`. It picks the version
   (`desktop/scripts/set_version.py --next`), runs the engine tests and interface build, builds the Windows installer,
-  the Mac apps (Apple Silicon and Intel, ad-hoc signed, engine-tested on the runner) and the Linux packages (on
+  the Mac app (Apple Silicon, ad-hoc signed, engine-tested on the runner) and the Linux packages (on
   Ubuntu 22.04 in Docker, each installed and started on a clean system, with a hard time limit), signs the
   updater files with `TAURI_SIGNING_PRIVATE_KEY`, writes `latest.json` and `SHA256SUMS`, and publishes the release with
   notes from `CHANGELOG.md`.

@@ -29,7 +29,6 @@ def notes(version: str, repo: str, folder: Path | None = None) -> str:
         ("Fedora / RHEL / openSUSE", f"KeiroLake-{version}-1.x86_64.rpm", f"`sudo dnf install ./KeiroLake-{version}-1.x86_64.rpm`"),
         ("Any Linux", f"KeiroLake_{version}_amd64.AppImage", "`chmod +x` it, then run it. Updates itself."),
         ("macOS, Apple Silicon (M1 and newer)", f"KeiroLake_{version}_aarch64.dmg", "Open it and drag KeiroLake to Applications. First launch: right-click → Open."),
-        ("macOS, Intel", f"KeiroLake_{version}_x86_64.dmg", "Same as above."),
     ]
     present = (lambda f: True) if folder is None else (lambda f: (folder / f).exists())  # leave out a Mac build that failed
     table = "\n".join(f"| {system} | [{file}]({base}/{file}) | {how} |" for system, file, how in rows if present(file))

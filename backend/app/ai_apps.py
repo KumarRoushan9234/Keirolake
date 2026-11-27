@@ -107,7 +107,7 @@ def add_to_claude_desktop(raw_key: str) -> dict:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(config, indent=2), encoding="utf-8")
     tmp.replace(path)
-    return {"path": str(path), "restart": "Quit Claude Desktop completely (also from the tray) and open it again."}
+    return {"path": str(path), "restart": "Claude Desktop reads this only when it starts: quit it completely (also from the tray, or Task Manager) and open it again."}
 
 
 def claude_desktop_status() -> dict:
