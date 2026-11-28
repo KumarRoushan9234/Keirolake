@@ -50,6 +50,7 @@ def get_engine() -> Engine:
 
 def init_db() -> None:
     from app.catalog import models  # noqa: F401  (register tables)
+    from app.monitor import models as _monitor_models  # noqa: F401  (register the monitoring tables)
 
     engine = get_engine()
     models.Base.metadata.create_all(engine)

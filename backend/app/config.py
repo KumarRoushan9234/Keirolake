@@ -191,6 +191,7 @@ class Settings:
     rag_web_fallback: bool
     rag_web_threshold: float
     max_upload_mb: int
+    rag_min_cosine: float = 0.30  # local hits below this similarity are not used as sources
     llm_mode: str = "local-first"  # local-first | local | cloud | auto (cloud first)
     cloud_daily_limit: int = 300  # cloud model calls per day; 0 = no limit
     keiro_zdr: bool = True  # ask KeiroLabs not to retain queries or results
@@ -273,6 +274,7 @@ def get_settings() -> Settings:
         rag_web_fallback=_bool("RAG_WEB_FALLBACK", True),
         # Best cosine similarity below which local context counts as "weak".
         rag_web_threshold=float(_env("RAG_WEB_THRESHOLD") or 0.45),
+        rag_min_cosine=float(_env("RAG_MIN_COSINE") or 0.30),
         max_upload_mb=int(_env("MAX_UPLOAD_MB") or 100),
         llm_mode=_llm_mode(),
         cloud_daily_limit=int(_env("CLOUD_DAILY_LIMIT") or 300),

@@ -36,7 +36,8 @@ WRITE = """You write a research answer from numbered EVIDENCE.
 - Cite every factual sentence with source tags like [S1] or [S2][S5], using only numbers that appear in the evidence.
 - Use clear Markdown: a short direct answer first, then details, tables when comparing.
 - If the evidence doesn't answer something, say so plainly. Never invent facts or sources.
-- Note disagreements between sources."""
+- Note disagreements between sources.
+- Never invent companies, prices, results or "sample" or "simulated" data. If the evidence lacks the figures asked for, say so and name the kind of source that would have them."""
 
 CHECK = """Does the SOURCE text support the CLAIM? Reply with one word: YES or NO."""
 
@@ -58,13 +59,16 @@ def _chunks(text: str, size: int = 1200, overlap: int = 150, limit: int = 4) -> 
 
 
 async def _lake(question: str, kb_id: str | None, use_library: bool) -> list[Passage]:
+    from app.config import get_settings
+
+    min_cosine = get_settings().rag_min_cosine
     from app.library import service as library
     from app.rag.retrieve import retrieve, retrieve_all
 
     out: list[Passage] = []
     try:
         hits = (await retrieve(kb_id, question, 8)).hits if kb_id else (await retrieve_all(question, 8))[0]
-        out += [Passage(h.text, h.url or "", h.title, "lake") for h in hits]
+        out += [Passage(h.text, h.url or "", h.title, "lake") for h in hits if h.cosine is None or h.cosine >= min_cosine]
     except Exception as exc:  # noqa: BLE001 - research continues without it
         log.info("Lake search failed: %s", exc)
     if use_library:
@@ -99,18 +103,38 @@ def verify_claims(answer: str, pool: Pool) -> tuple[list[str], list[str], list[s
 
 async def research_stream(question: str, *, depth: str = "standard", kb_id: str | None = None,
                           history: list[ChatMessage] | None = None, use_library: bool = True,
-                          allow_web: bool = True) -> AsyncIterator[dict]:
+                          allow_web: bool = True, task: str = "") -> AsyncIterator[dict]:
     from app.config import offline_mode
     from app.keiro.client import KeiroError, get_keiro
     from app.llm.registry import AllModelsFailed, get_router
     from app.net import connectivity
+    from app.llm import tasks
+    from app.rag import guard
+    from app.rag.rewrite import search_queries
+
+    job = tasks.classify(question, depth=depth, override=task)
+    slot = job.slot
 
     preset = DEPTHS.get(depth, DEPTHS["standard"])
     started = time.monotonic()
     router = get_router()
     pool = Pool()
-    yield {"type": "status", "message": "Searching your lake"}
-    pool.add(await _lake(question, kb_id, use_library))
+    queries0 = await search_queries(question, history)
+    topic = queries0[0] if queries0 else question
+    yield {"type": "task", "slot": slot, "label": tasks.SLOT_LABELS[slot], "reason": job.reason, "model": tasks.slot_value(slot)}
+    yield {"type": "status", "message": "Searching your lake for: " + topic}
+    pool.add(await _lake(topic, kb_id, use_library))
+    try:
+        from app.monitor import service as monitor
+
+        mon, mon_why, mon_hint = await monitor.context_for(question, topic)
+        pool.add([Passage(w.content or w.snippet, w.url, w.title, "lake") for w in mon])
+        if mon_why:
+            yield {"type": "status", "message": mon_why}
+        elif mon_hint:
+            yield {"type": "status", "message": mon_hint}
+    except Exception as exc:  # noqa: BLE001 - the monitors are optional context
+        log.info("Monitor context failed: %s", exc)
 
     keiro = get_keiro()
     web_ok = allow_web and keiro.configured and connectivity.is_online and not offline_mode()
@@ -136,7 +160,7 @@ async def research_stream(question: str, *, depth: str = "standard", kb_id: str 
             break
         seen = {_norm(q) for q in done_queries}
         queries = []
-        for q in plan.get("queries") or ([question] if round_no == 0 else []):
+        for q in plan.get("queries") or (queries0 if round_no == 0 else []):
             q = str(q).strip()[:200]
             if q and _norm(q) not in seen:
                 seen.add(_norm(q))
@@ -164,8 +188,8 @@ async def research_stream(question: str, *, depth: str = "standard", kb_id: str 
         added = pool.add([p for b in batches for p in b])
         yield {"type": "status", "message": f"Round {round_no + 1}: {added} new passages from {sum(1 for b in batches if b)} searches"}
 
-    ranked = await pool.rank(question)
-    used = ranked[:60]
+    ranked = await pool.rank(topic)
+    used = [p for p in ranked if guard.relevance(p.title + " " + p.text, set(terms(topic))) >= 0.25][:60] or ranked[:20]
     sources = pool.sources()
     yield {"type": "sources", "local": [], "library": [], "private": [], "web": [], "research": sources,
            "best_cosine": None, "web_used": searches > 0}
@@ -176,7 +200,7 @@ async def research_stream(question: str, *, depth: str = "standard", kb_id: str 
                 ChatMessage("user", f"EVIDENCE:\n{context(used, preset['context'])}\n\n---\n\nQUESTION: {question}")]
     answer = ""
     try:
-        async for item in router.stream(messages, temperature=0.2, max_tokens=1800):
+        async for item in router.stream(messages, temperature=0.2, max_tokens=1800, task=slot):
             if isinstance(item, tuple):
                 yield {"type": "meta", "model": item[1]}
             else:
@@ -210,6 +234,12 @@ async def research_stream(question: str, *, depth: str = "standard", kb_id: str 
         answer += note
         yield {"type": "token", "text": note}
     yield {"type": "verify", "checked": len(supported) + len(unsupported), "supported": len(supported), "unsupported": len(unsupported)}
+    verdict = guard.check(answer, context(used, 60000))
+    if verdict.tripped:
+        note = "\n\n> **Check this report.** " + verdict.message() + " Run it again with a stronger model, or add real data."
+        answer += note
+        yield {"type": "token", "text": note}
+        yield {"type": "guard", "reasons": verdict.reasons}
     try:
         kept = await asyncio.to_thread(store, "research", question, [p for p in used if p.origin == "web"])
         if kept:

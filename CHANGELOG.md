@@ -5,6 +5,29 @@ automatic release.
 
 ## Unreleased
 
+**Answers that don't make things up**
+- A question like "top performing Indian stocks for the last 30 days" used to produce an invented report (XYZ Limited,
+  made-up figures) with unrelated sources. Now:
+  - the question is rewritten into short standalone searches, so follow-ups ("these stocks") and typos work;
+  - sources must actually be about the question: weak local matches and old unrelated research are dropped;
+  - finance questions use real prices stored on your computer;
+  - an answer with placeholder names, "simulated" data or figures that appear in no source gets a clear warning and a
+    **Try the Hard tasks model** button.
+
+**Monitor** (new)
+- Markets: real 1, 7, 30 and 90-day top performers for India's large companies (Yahoo Finance), every NSE stock from the
+  end-of-day files you import, a watchlist, and quarterly earnings with a Finnhub key. Stocks with a split or bonus issue
+  are left out and named instead of shown as a crash.
+- World: earthquakes (USGS), disaster alerts (GDACS), outbreaks (WHO), news signals (GDELT).
+- Cyber: exploited vulnerabilities (CISA), critical CVEs (NVD), malware indicators (abuse.ch), and a lookup by CVE, vendor
+  or product.
+- Alert rules with notices anywhere in the app and a `monitor.alert` webhook; a cited daily brief.
+- Seven new MCP tools for Claude, ChatGPT and your apps.
+
+**A model for each kind of task** (new)
+- Slots for everyday, hard tasks, research and coding, chosen from a live list (models.dev and OpenRouter, refreshed daily)
+  that shows what each model is good for and its price. Private notes never leave the computer.
+
 **Use the lake from Claude, ChatGPT, Cursor and VS Code**
 - Serve → AI apps: one click adds KeiroLake to Claude Desktop; ready setups for Claude Code, Cursor and VS Code, and a
   connector link for Claude.ai and ChatGPT over the internet link. Each app gets its own key.

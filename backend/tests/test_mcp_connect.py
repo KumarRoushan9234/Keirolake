@@ -69,3 +69,43 @@ def test_connector_link_works_and_is_never_logged(client):
     assert "/mcp/k/…" in logged and not any(raw in p for p in logged)
     access.revoke(info["id"])
     assert client.post(f"/mcp/k/{raw}", json={"jsonrpc": "2.0", "id": 1, "method": "ping"}).status_code == 401
+
+
+def test_monitor_tools_return_stored_data_and_say_what_is_missing(client):
+    import datetime as dt
+
+    from app.db import init_db, session_scope
+    from app.monitor import markets, service
+    from app.monitor import sources as S
+    from app.monitor.models import MarketPrice, MonitorEvent
+    from sqlalchemy import delete
+
+    init_db()
+    with session_scope() as s:
+        s.execute(delete(MarketPrice))
+        s.execute(delete(MonitorEvent))
+    _, raw = access.create_key("claude-monitor", ["read", "write"])
+    h = {"Authorization": f"Bearer {raw}"}
+    names = {t["name"] for t in _rpc(client, "tools/list", headers=h)["result"]["tools"]}
+    assert {"market_movers", "market_quote", "monitor_events", "threat_lookup", "monitor_alerts", "daily_brief", "write_brief"} <= names
+
+    empty = json.loads(_call(client, "market_movers", {"days": 30}, h)["content"][0]["text"])
+    assert empty["ok"] is False and "Turn on" in empty["reason"]  # no invented numbers
+    assert "No prices are stored" in _call(client, "market_quote", {"symbol": "TCS"}, h)["content"][0]["text"]
+    assert "No brief has been written" in _call(client, "daily_brief", {}, h)["content"][0]["text"]
+    assert _call(client, "write_brief", {}, h)["isError"] is True  # nothing to brief on
+
+    today = dt.date.today()
+    markets.store_prices([{"symbol": "TCS.NS", "day": (today - dt.timedelta(days=i)).isoformat(), "close": 100.0 + i * 0.5, "prev_close": None, "source": "yahoo", "currency": "INR"}
+                          for i in range(40)])
+    q = json.loads(_call(client, "market_quote", {"symbol": "tcs"}, h)["content"][0]["text"])
+    assert q["symbol"] == "TCS.NS" and q["history_days"] >= 35
+    service.store_events(S.parse_kev({"vulnerabilities": [{"cveID": "CVE-2026-9999", "vendorProject": "Acme", "product": "Widget", "vulnerabilityName": "RCE",
+                                                          "dateAdded": today.isoformat(), "shortDescription": "x", "requiredAction": "Patch", "dueDate": "", "knownRansomwareCampaignUse": "Known"}]}))
+    ev = json.loads(_call(client, "monitor_events", {"group": "cyber", "min_severity": "high"}, h)["content"][0]["text"])
+    assert ev and ev[0]["title"].startswith("CVE-2026-9999")
+    assert json.loads(_call(client, "threat_lookup", {"term": "acme"}, h)["content"][0]["text"])[0]["severity"] == "critical"
+    assert isinstance(json.loads(_call(client, "monitor_alerts", {}, h)["content"][0]["text"]), list)
+    _, ro = access.create_key("ro", ["ask"])
+    denied = _call(client, "market_movers", {}, {"Authorization": f"Bearer {ro}"})
+    assert denied["isError"] is True  # no read permission

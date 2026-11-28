@@ -29,6 +29,7 @@ class AskBody(BaseModel):
     library: bool = True
     private: bool = False
     depth: str = Field("answer", pattern="^(answer|quick|standard|deep)$")
+    task: str = Field("", pattern="^(|everyday|hard|research|coding)$")
 
 
 @router.get("")
@@ -71,7 +72,7 @@ async def delete(conv_id: str) -> None:
 @router.post("/{conv_id}/ask", status_code=202)
 async def ask(conv_id: str, body: AskBody) -> dict:
     try:
-        return chat.ask(conv_id, body.question, web=body.web, library=body.library, private=body.private, depth=body.depth)
+        return chat.ask(conv_id, body.question, web=body.web, library=body.library, private=body.private, depth=body.depth, task=body.task)
     except KeyError:
         raise HTTPException(404, "Conversation not found") from None
 

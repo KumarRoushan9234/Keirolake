@@ -13,7 +13,8 @@ How each part of KeiroLake works, with the details the [README](../README.md) le
 - [Connectors and watched folders](#connectors-and-watched-folders)
 - [Offline libraries](#offline-libraries)
 - [Map](#map)
-- [Models](#models): [quantized](#quantized-models) and [Heretic](#heretic-models)
+- [Models](#models): [a model for each task](#a-model-for-each-kind-of-task), [quantized](#quantized-models) and [Heretic](#heretic-models)
+- [Monitor](#monitor-markets-world-events-and-cyber-threats)
 - [Sharing](#sharing): [over the internet](#over-the-internet), [your own address](#your-own-address),
   [stay reachable](#stay-reachable-when-youre-away)
 - [Use it from Claude, ChatGPT, Cursor or VS Code](#use-it-from-claude-chatgpt-cursor-or-vs-code)
@@ -218,6 +219,19 @@ needs re-indexing. **Add connector** pulls in a JSON API, a feed or a folder on 
 - **Cloud models:** OpenRouter, Groq, DeepSeek, Gemini, Anthropic, OpenAI, Mistral and Together, tried in the order you
   set, and used only up to the daily limit.
 
+### A model for each kind of task
+
+**Models → Model for each kind of task** lets you hand hard work to a stronger model while everyday questions stay on your
+own computer. There are four slots: **Everyday**, **Hard tasks** (analysis, comparisons, planning), **Research and
+reports** (deep research, briefs) and **Coding**. An empty slot changes nothing.
+
+The list of models is live: it comes from models.dev and OpenRouter, refreshes daily and is kept for offline use, and
+shows, for each model, what it is good for (hard reasoning, coding, long documents, reads images, cheap and fast), its
+price and size. *Best fits among what you can use now* suggests models from the providers you have a key for, and from
+Ollama on this computer. KeiroLake picks the slot for each question by itself ("Needs careful reasoning", "A report"),
+shows which one answered and why, and **Try the Hard tasks model** re-runs an answer that looks made up. Private notes
+and the Vault never use a cloud slot, and the daily cloud limit still applies.
+
 ### Quantized models
 
 ![Quantized models](screenshots/models-quantized.png)
@@ -274,6 +288,46 @@ run it and bring the result into Ollama.
 5. **Use it.** Pick it in Ask, Build with AI or the API like any other local model.
 
 You are responsible for how you use a modified model.
+
+## Monitor: markets, world events and cyber threats
+
+**Monitor** keeps a local watch on the world, from sources that allow programs to read them. Nothing is fetched until you
+switch a source on, and everything is stored on this computer. You can ask about any of it in plain words.
+
+| Tab | What it holds | Sources |
+|---|---|---|
+| **Markets** | Top and weakest Indian stocks over 1, 7, 30 or 90 days, plus a watchlist of indices and global stocks | Yahoo Finance daily charts; NSE end-of-day files you import; Finnhub with a free key |
+| **World** | Earthquakes, disaster alerts, disease outbreaks and news signals | USGS, GDACS (UN and EU), WHO Disease Outbreak News, GDELT |
+| **Cyber** | Vulnerabilities attackers are using, new critical CVEs, malware indicators, and a lookup by CVE, vendor or product | CISA Known Exploited Vulnerabilities, NIST NVD, abuse.ch ThreatFox (free key) |
+| **Alerts and brief** | Alerts from your rules, and a cited daily brief | Written by your model from what the monitors collected |
+
+**Prices are real or absent, never invented.** Ask for the best stocks of the last 30 days and the answer comes from the
+closing prices stored here, with the period and the source. If nothing is stored, it says what to switch on. Two honest
+limits: the automatic list covers about 50 of India's largest companies (not every stock), and stocks whose price jumps
+more than 40% overnight (almost always a split or bonus issue) are left out and named, not shown as a crash.
+
+**All NSE stocks.** NSE publishes one end-of-day file for every listed stock. Download the `sec_bhavdata_full` files from
+nseindia.com → Daily Reports (one per day, about 30 for a month) and use **Import NSE files**. The movers then cover every
+stock that traded more than ₹1 crore that day.
+
+**Quarterly results** aren't in free price data. Add a free Finnhub key (Monitor → Markets → Finnhub key; best for US
+companies) or read the filing on the NSE or BSE website. KeiroLake says so instead of guessing.
+
+**Alerts.** Starting rules raise an alert for serious disasters (GDACS orange or red, earthquakes of magnitude 6 and
+above), critical exploited vulnerabilities (known ransomware use) and watchlist prices moving 5% in a day. Add your own:
+words to watch for (a vendor or product), severity levels, price moves, new highs and lows. Alerts appear as notices
+wherever you are in the app, and go to any webhook subscribed to `monitor.alert`.
+
+**Daily brief.** *Write today's brief* summarises what changed, with a source number on every bullet. Switch on *Daily
+brief* to get one each morning. It uses your **Research and reports** model.
+
+**From Claude, ChatGPT and your apps.** The MCP tools `market_movers`, `market_quote`, `monitor_events`, `threat_lookup`,
+`monitor_alerts`, `daily_brief` and `write_brief` give AI apps the same real data.
+
+Sources and their terms: USGS (public domain), GDACS, WHO, GDELT (attribution requested), CISA and NVD (public),
+abuse.ch (CC0), Yahoo Finance chart data (unofficial; for personal use), NSE files you download yourself. Each source
+shows its attribution on the page. ReliefWeb and ACLED need registration and aren't built in. This is information, not
+investment advice.
 
 ## Sharing
 

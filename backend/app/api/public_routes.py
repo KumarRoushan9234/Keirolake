@@ -299,11 +299,29 @@ TOOLS = [
     ("write", {"name": "fill_table", "description": "Create the planned table and fill it with rows, each with a source and a confidence. Returns a job id.",
                "inputSchema": {"type": "object", "required": ["session_id"], "properties": {
                    "session_id": {"type": "string"}, "rows": {"type": "integer", "minimum": 1, "maximum": 200}}}}),
+    ("read", {"name": "market_movers", "description": "Real top and bottom Indian stocks over 1, 7, 30 or 90 days from prices stored on this computer. Says what is missing instead of guessing.",
+              "inputSchema": {"type": "object", "properties": {"days": {"type": "integer", "minimum": 1, "maximum": 365}, "limit": {"type": "integer", "minimum": 1, "maximum": 25}}}}),
+    ("read", {"name": "market_quote", "description": "Latest stored close, day change, range and history length for one symbol (RELIANCE, TCS, AAPL, ^NSEI).",
+              "inputSchema": {"type": "object", "required": ["symbol"], "properties": {"symbol": {"type": "string"}}}}),
+    ("read", {"name": "monitor_events", "description": "Recent world events and cyber threats the user's monitors collected: earthquakes, disasters, outbreaks, exploited vulnerabilities, new CVEs.",
+              "inputSchema": {"type": "object", "properties": {
+                  "group": {"type": "string", "enum": ["crisis", "cyber"]}, "kind": {"type": "string", "enum": ["quake", "disaster", "outbreak", "news", "cve", "ioc"]},
+                  "min_severity": {"type": "string", "enum": ["info", "low", "medium", "high", "critical"]}, "days": {"type": "integer", "minimum": 1, "maximum": 120},
+                  "query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 50}}}}),
+    ("read", {"name": "threat_lookup", "description": "Look up a CVE id, vendor or product in the vulnerabilities and indicators the user's monitors have stored.",
+              "inputSchema": {"type": "object", "required": ["term"], "properties": {"term": {"type": "string"}}}}),
+    ("read", {"name": "monitor_alerts", "description": "Recent alerts raised by the user's monitor rules.",
+              "inputSchema": {"type": "object", "properties": {"limit": {"type": "integer", "minimum": 1, "maximum": 50}}}}),
+    ("read", {"name": "daily_brief", "description": "The latest written brief of markets, world events and cyber threats, with its sources.",
+              "inputSchema": {"type": "object", "properties": {}}}),
+    ("write", {"name": "write_brief", "description": "Write a new brief from what the monitors collected in the last day. Returns the brief with its sources.",
+               "inputSchema": {"type": "object", "properties": {}}}),
     ("llm", {"name": "list_models", "description": "The AI models this lake can answer with: models on the user's computer, cloud models and 'lake' (answers from the user's data).",
              "inputSchema": {"type": "object", "properties": {}}}),
 ]
 READ_ONLY = {"list_knowledge_bases", "search", "list_datasets", "ask", "query_sql", "list_tables", "read_rows", "search_table",
-             "list_topics", "overview", "job_status", "list_models"}
+             "list_topics", "overview", "job_status", "list_models", "market_movers", "market_quote", "monitor_events", "threat_lookup", "monitor_alerts",
+             "daily_brief"}
 for _scope, _tool in TOOLS:
     _tool["annotations"] = {"readOnlyHint": _tool["name"] in READ_ONLY, "destructiveHint": False,
                             "openWorldHint": _tool["name"] in ("ask", "build_topic", "capture")}
@@ -312,6 +330,8 @@ tables (SQL with sources for each cell), topics gathered from the web, and offli
 Call overview first to see what exists. Use ask for a cited answer, search for passages, and list_tables, read_rows or
 query_sql for tables. To build a dataset: plan_table with a description, adjust it by calling plan_table again with the
 session_id, then fill_table, and follow it with job_status. Save things for the user with capture.
+For markets, world events and cyber threats use market_movers, market_quote, monitor_events, threat_lookup, monitor_alerts and
+daily_brief: they return real stored data and say what is missing, so never invent prices or events.
 Always cite the titles and URLs that results return. Tools are limited to this key's permissions."""
 
 
@@ -350,6 +370,8 @@ async def _call_tool(key: dict, name: str, args: dict) -> str:
         return await _table_tool(key, name, args)
     if name in ("overview", "job_status", "capture", "plan_table", "fill_table", "list_models"):
         return await _assistant_tool(key, name, args)
+    if name in ("market_movers", "market_quote", "monitor_events", "threat_lookup", "monitor_alerts", "daily_brief", "write_brief"):
+        return await _monitor_tool(name, args)
     kb = kb_for(key, str(args.get("kb", "")))
     job_id = runner.submit("ingest", f"API ({key['name']}): {str(args.get('title'))[:60]}",
                            ingest_web.text_job(kb["id"], str(args.get("title", ""))[:300], str(args.get("text", ""))))
@@ -384,6 +406,30 @@ async def _table_tool(key: dict, name: str, args: dict) -> str:
     except KeyError:
         raise HTTPException(404, "No such table") from None
     except (tables_api.TableError, sheet_service.SheetError, topics.TopicError) as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+async def _monitor_tool(name: str, args: dict) -> str:
+    from app.monitor import markets, service
+
+    if name == "market_movers":
+        return json.dumps(markets.movers(max(1, min(int(args.get("days") or 30), 365)), max(1, min(int(args.get("limit") or 10), 25))), default=str)
+    if name == "market_quote":
+        q = markets.quote(str(args.get("symbol", "")))
+        return json.dumps(q if q else {"error": "No prices are stored for that symbol. The user can add it to the watchlist in Monitor → Markets."}, default=str)
+    if name == "monitor_events":
+        return json.dumps(service.events(str(args.get("group") or ""), str(args.get("kind") or ""), str(args.get("min_severity") or "info"),
+                                         max(1, min(int(args.get("days") or 7), 120)), str(args.get("query") or ""), max(1, min(int(args.get("limit") or 20), 50))), default=str)
+    if name == "threat_lookup":
+        return json.dumps(service.lookup_threat(str(args.get("term", ""))), default=str)
+    if name == "monitor_alerts":
+        return json.dumps(service.alerts(max(1, min(int(args.get("limit") or 20), 50))), default=str)
+    if name == "daily_brief":
+        b = service.briefs(1)
+        return json.dumps(b[0] if b else {"error": "No brief has been written yet. Use write_brief, or turn on the Daily brief in Monitor."}, default=str)
+    try:
+        return json.dumps(await service.generate_brief(), default=str)
+    except RuntimeError as exc:
         raise HTTPException(400, str(exc)) from exc
 
 

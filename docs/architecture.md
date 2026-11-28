@@ -83,6 +83,29 @@ Nothing long-running belongs to a page.
   updater files with `TAURI_SIGNING_PRIVATE_KEY`, writes `latest.json` and `SHA256SUMS`, and publishes the release with
   notes from `CHANGELOG.md`.
 
+### Monitoring desk
+
+`app/monitor/` (tables in `models.py`, parsers in `sources.py`, prices in `markets.py`, scheduling, rules, answer context
+and the brief in `service.py`). Each source is a row in `monitor_sources` (off by default) run by `monitor_loop` through the
+job runner; events go to `monitor_events` (unique per source and id), daily prices to `market_prices`. Rules (`monitor_rules`)
+are checked on every new event or price day and raise rows in `monitor_alerts`, a `monitor.alert` webhook and a notice.
+`context_for()` gives answers and research the stored prices and events relevant to a question, and a hint saying what to
+switch on when nothing is stored. Movers skip thinly traded stocks and any stock whose price jumps 40% in one day (a split
+or bonus issue). NSE's archive blocks non-browser clients, so full-market prices come from files the user imports.
+
+### Task routing and the model catalogue
+
+`app/llm/tasks.py` classifies a message (rules, no model call) into a slot; `LLMRouter.attempts(task=…)` puts the user's slot
+model first and keeps the normal fallback order after it (cloud slots are skipped offline, over the daily limit, in local mode
+and for private notes). `app/llm/catalog.py` merges models.dev and OpenRouter lists with the installed Ollama models, derives
+use cases from each model's facts, and caches the result in `<data>/models-catalog.json`.
+
+### Answer quality
+
+`rag/rewrite.py` turns a message and its history into short standalone queries; `rag/guard.py` flags placeholder names,
+"simulated" data and numbers found in no source; `engine/evidence.recall` and the cosine floor (`RAG_MIN_COSINE`) keep
+unrelated passages out.
+
 ### Capture and speech
 
 - `app/inbox.py` takes captures (voice, photo, link, text, shared files) as background jobs into a "Captured" collection,

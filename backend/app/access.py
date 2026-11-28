@@ -35,6 +35,8 @@ EVENTS = {
     "ingest.finished": "Documents were added (upload, folder, web, pipeline)",
     "pipeline.finished": "A pipeline run finished",
     "dataset.created": "A table was added to the warehouse",
+    "monitor.alert": "A monitor alert was raised (a disaster, a critical vulnerability, a big price move, a word you watch)",
+    "monitor.brief": "The daily brief was written",
 }
 RATE_PER_MINUTE = 120
 KEEP_LOG_ROWS = 5000

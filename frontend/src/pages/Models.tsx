@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api, errText, Job } from "../api";
 import Heretic from "./models/Heretic";
 import Quantized from "./models/Quantized";
+import Slots from "./models/Slots";
 import { Card, ErrorNote, PageHeader, Progress, usePoll } from "../ui";
 
 type Model = { id: string; label: string; size_gb: number; need_gb?: number; note: string; dim?: number };
@@ -42,6 +43,7 @@ export default function Models() {
       <PageHeader title="Models" />
       <Usage />
       <ErrorNote error={error} onClose={() => setError("")} />
+      <Slots />
 
       <Card title={<span className="flex items-center gap-2"><Cpu size={16} className="text-accent-400" />This computer</span>}>
         {!h ? <div className="skeleton h-16" /> : (

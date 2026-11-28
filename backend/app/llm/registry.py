@@ -14,6 +14,7 @@ from typing import AsyncIterator
 from app import usage
 from app.config import LOCAL_PROVIDERS, get_settings, provider_config
 from app.llm.anthropic_backend import AnthropicBackend
+from app.llm import tasks
 from app.llm.base import ChatBackend, ChatMessage, LLMError
 from app.llm.openai_compat import OpenAICompatBackend
 
@@ -78,9 +79,34 @@ class LLMRouter:
 
         return effective_order(self.base_order, get_settings().llm_mode, connectivity.is_online)
 
-    def attempts(self, include_cooling: bool = False, local_only: bool = False) -> list[Attempt]:
+    def slot_attempt(self, task: str, local_only: bool = False) -> Attempt | None:
+        """The model the user chose for this kind of task, if it can be used right now."""
+        parsed = tasks.parse(tasks.slot_value(task)) if task != "everyday" or tasks.slot_value("everyday") else None
+        if parsed is None:
+            return None
+        provider, model = parsed
+        is_local = provider in LOCAL_PROVIDERS
+        if local_only and not is_local:
+            return None  # private notes never leave this computer
+        if not is_local:
+            from app.net import connectivity
+
+            if not (connectivity.is_online and usage.cloud_allowed() and get_settings().llm_mode != "local"):
+                return None
+        cfg = provider_config(provider)
+        if not is_local and not cfg.api_key:
+            return None
+        if not cfg.base_url:
+            return None
+        backend = AnthropicBackend(cfg) if provider == "anthropic" else OpenAICompatBackend(cfg)
+        return Attempt(provider, model, backend)
+
+    def attempts(self, include_cooling: bool = False, local_only: bool = False, task: str = "everyday") -> list[Attempt]:
         out: list[Attempt] = []
         now = time.monotonic()
+        chosen = self.slot_attempt(task, local_only)
+        if chosen is not None and (include_cooling or self._cooldown.get((chosen.provider, chosen.model), 0) <= now):
+            out.append(chosen)
         order = effective_order(self.base_order, "local", True) if local_only else self.order
         if not usage.cloud_allowed():
             order = [p for p in order if p in LOCAL_PROVIDERS]
@@ -91,9 +117,10 @@ class LLMRouter:
             for model in provider_config(name).models:
                 if not include_cooling and self._cooldown.get((name, model), 0) > now:
                     continue
-                out.append(Attempt(name, model, backend))
+                if chosen is None or (name, model) != (chosen.provider, chosen.model):
+                    out.append(Attempt(name, model, backend))
         # If everything is cooling down, try them all anyway rather than fail.
-        return out or ([] if include_cooling else self.attempts(include_cooling=True, local_only=local_only))
+        return out or ([] if include_cooling else self.attempts(include_cooling=True, local_only=local_only, task=task))
 
     @staticmethod
     def _count(attempt: Attempt) -> None:
@@ -106,9 +133,9 @@ class LLMRouter:
         self._cooldown[(attempt.provider, attempt.model)] = time.monotonic() + COOLDOWN_SECONDS
 
     async def complete(self, messages: list[ChatMessage], *, temperature: float = 0.2, max_tokens: int = 1024,
-                       local_only: bool = False) -> LLMResult:
+                       local_only: bool = False, task: str = "everyday") -> LLMResult:
         errors: list[str] = []
-        for attempt in self.attempts(local_only=local_only):
+        for attempt in self.attempts(local_only=local_only, task=task):
             try:
                 self._count(attempt)
                 text = await attempt.backend.complete(attempt.model, messages, temperature=temperature, max_tokens=max_tokens)
@@ -129,7 +156,8 @@ class LLMRouter:
         return "No model provider is configured for this mode."
 
     async def stream(
-        self, messages: list[ChatMessage], *, temperature: float = 0.2, max_tokens: int = 1024, local_only: bool = False
+        self, messages: list[ChatMessage], *, temperature: float = 0.2, max_tokens: int = 1024, local_only: bool = False,
+        task: str = "everyday",
     ) -> AsyncIterator[tuple[str, str] | str]:
         """Yield ("meta", "provider:model") once, then text deltas.
 
@@ -137,7 +165,7 @@ class LLMRouter:
         surfaced to the caller because partial output was already sent.
         """
         errors: list[str] = []
-        for attempt in self.attempts(local_only=local_only):
+        for attempt in self.attempts(local_only=local_only, task=task):
             started = False
             try:
                 self._count(attempt)

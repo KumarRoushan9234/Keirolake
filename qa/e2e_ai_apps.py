@@ -113,7 +113,7 @@ try:
     check("bridge: a wrong key gets a clear message", "refused the API key" in bad.stdout)
 
     tools_ref = app.get("/connect/tools").json()
-    check("Docs: MCP tool reference", len(tools_ref) == 19, len(tools_ref))
+    check("Docs: MCP tool reference", len(tools_ref) >= 26, len(tools_ref))
     log = app.get("/connect/logs/engine?lines=300").json()
     check("Docs: engine log readable", len(log["text"]) > 100, log["path"])
     check("Docs: no keys in the log", out["raw_key"] not in log["text"] and "klk_" not in log["text"].replace("klk_[redacted]", ""))

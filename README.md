@@ -163,6 +163,19 @@ bell in the top bar counts everything still running.
 
 ![Background notices](docs/screenshots/notices.png)
 
+### Monitor markets, world events and cyber threats
+
+A local watch from open sources, off until you switch it on: real top performers among India's large companies (or every
+NSE stock, from files you import), earthquakes, disaster alerts and outbreaks, exploited vulnerabilities and new CVEs,
+with alert rules, a cited daily brief, and the same data for Claude and ChatGPT through MCP. Prices are real or absent:
+KeiroLake says what is missing instead of inventing a report. [How it works](docs/guide.md#monitor-markets-world-events-and-cyber-threats).
+
+### A model for each kind of task
+
+Keep everyday questions on your own computer and hand hard tasks, reports and coding to a stronger model of your choice,
+from a live list that says what each model is good for and what it costs.
+[How it works](docs/guide.md#a-model-for-each-kind-of-task).
+
 ### Capture from your phone
 
 Open your lake on your phone and add it to the home screen. The **Capture** tab puts anything into the lake in one tap:
@@ -234,8 +247,8 @@ flowchart TB
 
 - **OpenAI-compatible endpoint:** any OpenAI SDK, LangChain, LlamaIndex or agent framework, by changing the base URL.
 - **Tables as a database:** read, filter, sort, add and change rows over HTTP; search a table by meaning; saved views as JSON, CSV or JSON Lines.
-- **MCP server:** 19 tools to search, ask, read and write tables, run read-only SQL, build a table by describing it,
-  capture notes and links, and build topics. The tools a client sees depend on its key.
+- **MCP server:** 26 tools to search, ask, read and write tables, run read-only SQL, build a table by describing it,
+  capture notes and links, build topics, and read markets, world events and threats. The tools a client sees depend on its key.
 - **Claude, ChatGPT, Cursor and VS Code:** Serve → AI apps adds KeiroLake to Claude Desktop in one click, and gives a
   ready setup for the others ([how](docs/guide.md#use-it-from-claude-chatgpt-cursor-or-vs-code)).
 - **Webhooks:** signed calls when imports finish or tables are created.

@@ -107,7 +107,7 @@ def _history(conv_id: str) -> list[ChatMessage]:
 
 
 def ask(conv_id: str, question: str, *, web: str = "auto", library: bool = True, private: bool = False,
-        depth: str = "answer") -> dict:
+        depth: str = "answer", task: str = "") -> dict:
     """Store the question, start the answer in the background and return both message ids."""
     with session_scope() as s:
         c = s.get(Conversation, conv_id)
@@ -129,22 +129,22 @@ def ask(conv_id: str, question: str, *, web: str = "auto", library: bool = True,
         user_id, reply_id = user.id, reply.id
     live = Live()
     _live[reply_id] = live
-    live.task = asyncio.create_task(_run(reply_id, kb_id, question, history, web, library, private, live, depth))
+    live.task = asyncio.create_task(_run(reply_id, kb_id, question, history, web, library, private, live, depth, task))
     _prune()
     return {"user_id": user_id, "message_id": reply_id}
 
 
 async def _run(msg_id: str, kb_id: str | None, question: str, history: list[ChatMessage], web: str, library: bool,
-               private: bool, live: Live, depth: str = "answer") -> None:
+               private: bool, live: Live, depth: str = "answer", task: str = "") -> None:
     content, meta, status = "", {}, "done"
     last_save = time.monotonic()
     try:
         if depth in ("quick", "standard", "deep") and not private:
             from app.engine.research import research_stream
 
-            stream = research_stream(question, depth=depth, kb_id=kb_id, history=history, use_library=library, allow_web=web != "never")
+            stream = research_stream(question, depth=depth, kb_id=kb_id, history=history, use_library=library, allow_web=web != "never", task=task)
         else:
-            stream = answer_stream(kb_id, question, history, None, web, library, private)
+            stream = answer_stream(kb_id, question, history, None, web, library, private, task=task)
         async for event in stream:
             live.push(event)
             kind = event["type"]
@@ -156,6 +156,10 @@ async def _run(msg_id: str, kb_id: str | None, question: str, history: list[Chat
                 meta.update({k: event.get(k) or [] for k in ("local", "web", "library", "private", "research")})
             elif kind == "verify":
                 meta["verify"] = {k: event[k] for k in ("checked", "supported", "unsupported")}
+            elif kind == "task":
+                meta["task"] = {k: event[k] for k in ("slot", "label", "reason", "model")}
+            elif kind == "guard":
+                meta["guard"] = event["reasons"]
             elif kind == "safety":
                 meta["safety"] = event["message"]
             elif kind == "route":

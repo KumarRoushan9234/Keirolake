@@ -1,4 +1,4 @@
-import { ArrowUp, BookOpen, BookmarkSimple, ClockCounterClockwise, Copy, FileArrowUp, Globe, Lightbulb, LockKey, MagnifyingGlass, NotePencil, PencilSimple, Stop, Table as TableIcon, Trash, TreeStructure, Warning } from "@phosphor-icons/react";
+import { ArrowUp, BookOpen, BookmarkSimple, ClockCounterClockwise, Copy, FileArrowUp, Globe, Lightbulb, LockKey, MagnifyingGlass, NotePencil, PencilSimple, Sparkle, Stop, Table as TableIcon, Trash, TreeStructure, Warning } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,6 +11,7 @@ type Msg = {
   local?: any[]; web?: any[]; library?: any[]; private?: any[]; safety?: string; model?: string;
   route?: { route: string; reason: string }; progress?: string; error?: string;
   research?: { id: number; url: string; title: string; origin: string }[]; verify?: { checked: number; supported: number; unsupported: number };
+  task?: { slot: string; label: string; reason: string; model: string }; guard?: string[];
 };
 type Conv = { id: string; title: string; kb_id: string | null; updated_at: string };
 
@@ -25,13 +26,14 @@ const fromServer = (m: any): Msg => ({
 });
 
 export default function Ask() {
-  const { go, online } = useNav();
+  const { go, online, params } = useNav();
   const [kbs, setKbs] = useState<KB[]>([]);
   const [convs, setConvs] = useState<Conv[]>([]);
   const [convId, setConvId] = useState(store.get("conv"));
   const [kb, setKb] = useState(store.get("kb"));
   const [web, setWeb] = useState(store.get("web") || "auto");
   const [depth, setDepth] = useState(store.get("depth") || "answer");
+  useEffect(() => { if (params.q) setInput(params.q); }, [params.q]);  // "Ask about this" from the Monitor
   const [useLibrary, setUseLibrary] = useState(store.get("lib") !== "0");
   const [libCount, setLibCount] = useState(0);
   const [vaultOpen, setVaultOpen] = useState(false);
@@ -65,6 +67,8 @@ export default function Ask() {
         else if (e.type === "status") patch(id, (m) => ({ ...m, progress: e.message }));
         else if (e.type === "route") patch(id, (m) => ({ ...m, route: { route: e.route, reason: e.reason } }));
         else if (e.type === "meta") patch(id, (m) => ({ ...m, model: e.model }));
+        else if (e.type === "task") patch(id, (m) => ({ ...m, task: { slot: e.slot, label: e.label, reason: e.reason, model: e.model } }));
+        else if (e.type === "guard") patch(id, (m) => ({ ...m, guard: e.reasons }));
         else if (e.type === "sources") patch(id, (m) => ({ ...m, local: e.local, web: e.web, library: e.library, private: e.private, research: e.research }));
         else if (e.type === "verify") patch(id, (m) => ({ ...m, verify: { checked: e.checked, supported: e.supported, unsupported: e.unsupported } }));
         else if (e.type === "safety") patch(id, (m) => ({ ...m, safety: e.message }));
@@ -124,7 +128,7 @@ export default function Ask() {
     });
   }, []);
 
-  async function send(text = input) {
+  async function send(text = input, task = "") {
     const question = text.trim();
     if (!question || busy) return;
     setError("");
@@ -137,7 +141,7 @@ export default function Ask() {
         setConvId(id);
       }
       const ids = await api<{ user_id: string; message_id: string }>(`/conversations/${id}/ask`, {
-        method: "POST", json: { question, web, library: useLibrary, private: usePrivate && vaultOpen, depth },
+        method: "POST", json: { question, web, library: useLibrary, private: usePrivate && vaultOpen, depth, task },
       });
       setInput("");
       setMsgs((all) => [...all, { id: ids.user_id, role: "user", content: question },
@@ -312,6 +316,9 @@ export default function Ask() {
                     {m.status === "done" && !m.private?.length && (m.research?.length || m.web?.length || m.local?.length) ? (
                       <button className="btn-ghost px-2 py-1 text-xs" onClick={() => toSheet(m)}><TableIcon size={13} />{saved[m.id + "s"] ?? "Make a table"}</button>) : null}
                     <span className="flex-1" />
+                    {m.guard?.length && i > 0 && msgs[i - 1].role === "user" ? (
+                      <button className="btn-secondary px-2 py-1 text-xs" onClick={() => send(msgs[i - 1].content, "hard")}><Sparkle size={13} /> Try the Hard tasks model</button>) : null}
+                    {m.task && m.task.slot !== "everyday" && <span className="hidden sm:inline" title={m.task.reason}>{m.task.label}</span>}
                     {m.route && <span className="hidden sm:inline">{m.route.reason}</span>}
                     {m.model && <span className="badge-muted">{m.model}</span>}
                   </div>

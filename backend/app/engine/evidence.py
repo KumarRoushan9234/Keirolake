@@ -208,8 +208,10 @@ def store(task: str, query: str, passages: list[Passage]) -> int:
     return rows
 
 
-def recall(query: str, limit: int = 40) -> list[Passage]:
-    """Stored evidence that shares words with the query (best BM25 first)."""
+def recall(query: str, limit: int = 40, min_overlap: float = 0.5) -> list[Passage]:
+    """Stored evidence about the query: it must contain at least `min_overlap` of the query's words (best BM25 first).
+
+    Without that floor, one shared word ("india", "end") pulled in unrelated pages kept from earlier research."""
     q = terms(query)
     if not q:
         return []
@@ -220,5 +222,7 @@ def recall(query: str, limit: int = 40) -> list[Passage]:
             cond = c if cond is None else cond | c
         rows = list(s.scalars(select(EvidenceRow).where(cond).order_by(EvidenceRow.fetched_at.desc()).limit(500)))
         found = [Passage(r.text, r.url, r.title, "web") for r in rows]
+    wanted = set(q)
+    found = [p for p in found if len(wanted & set(terms(p.title + " " + p.text))) / len(wanted) >= min_overlap]
     order = _bm25_order(query, found)
     return [found[i] for i in order[:limit]]

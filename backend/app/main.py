@@ -28,6 +28,8 @@ from app.api.lake_routes import router as lake_router
 from app.api.builder_routes import router as builder_router
 from app.api.capture_routes import router as capture_router
 from app.api.connect_routes import router as connect_router
+from app.api.model_slots_routes import router as model_slots_router
+from app.api.monitor_routes import router as monitor_router
 from app.api.datatool_routes import router as datatool_router
 from app.api.public_routes import mcp_router, router as public_router
 from app.api.access_routes import router as access_router
@@ -130,7 +132,12 @@ async def lifespan(_: FastAPI):
     watcher = asyncio.create_task(watch_loop())
     backups = asyncio.create_task(backup_loop())
     pipes = asyncio.create_task(pipeline_loop())
+    from app.monitor import service as _monitor
+
+    _monitor.ensure_defaults()
+    monitors = asyncio.create_task(_monitor.monitor_loop())
     yield
+    monitors.cancel()
     autostart.cancel()
     warm.cancel()
     watcher.cancel()
@@ -184,6 +191,8 @@ app.include_router(lake_router)
 app.include_router(builder_router)
 app.include_router(capture_router)
 app.include_router(connect_router)
+app.include_router(model_slots_router)
+app.include_router(monitor_router)
 app.include_router(datatool_router)
 app.include_router(model_router)
 app.include_router(opendata_router)

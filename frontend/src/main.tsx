@@ -2,7 +2,7 @@ import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import {
   BookOpenText, Books, BookOpen, Broadcast, CaretRight, ChatCircleText, Cpu, Database, FolderOpen, GearSix, HardDrives, House, Key, Lightbulb, List,
-  LockKey, MagnifyingGlass, PlusCircle, Sparkle, Toolbox, Plug, Queue, ShareNetwork, SidebarSimple, SquaresFour, Table, TreeStructure, WebhooksLogo, Wrench, Robot,
+  LockKey, MagnifyingGlass, PlusCircle, Sparkle, Toolbox, Plug, Queue, ShareNetwork, SidebarSimple, SquaresFour, Table, TreeStructure, WebhooksLogo, Wrench, Robot, Pulse,
 } from "@phosphor-icons/react";
 import { ComponentType, lazy, StrictMode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -14,6 +14,7 @@ import JobsBell from "./shell/Jobs";
 import Notices from "./shell/Notices";
 import BottomNav from "./shell/BottomNav";
 import { useQueueFlusher } from "./capture";
+import { AlertWatcher } from "./shell/AlertWatcher";
 import { UpdateWatcher } from "./shell/Updates";
 import { setActivePage } from "./background";
 import Sidebar, { NavSection } from "./shell/Sidebar";
@@ -32,6 +33,7 @@ const DataTools = lazy(() => import("./pages/DataTools"));
 const Builder = lazy(() => import("./pages/Builder"));
 const Capture = lazy(() => import("./pages/Capture"));
 const AiApps = lazy(() => import("./pages/AiApps"));
+const Monitor = lazy(() => import("./pages/Monitor"));
 const Docs = lazy(() => import("./pages/Docs"));
 const data = () => import("./pages/DataPages");
 const serve = () => import("./pages/ServePages");
@@ -54,6 +56,7 @@ const SECTIONS: (NavSection & { pages: Entry[] })[] = [
     { id: "Ask", label: "Ask", icon: ChatCircleText, el: Ask },
     { id: "Capture", label: "Capture", icon: PlusCircle, el: Capture },
     { id: "Map", label: "Map", icon: TreeStructure, el: MapPage },
+    { id: "Monitor", label: "Monitor", icon: Pulse, el: Monitor },
   ] },
   { id: "data", label: "Data", icon: Database, pages: [
     { id: "Topics", label: "Topics", icon: Lightbulb, el: Topics },
@@ -185,6 +188,7 @@ function App() {
     { id: "sheet-describe", label: "Build a sheet from a description", hint: "KeiroLabs", run: () => go({ page: "Lake", params: { new: "describe" } }) },
     { id: "api-key", label: "Make an API key for an app", run: () => go({ page: "Connect" }) },
     { id: "ai-apps", label: "Connect Claude, ChatGPT, Cursor or VS Code", run: () => go({ page: "AiApps" }) },
+    { id: "monitor", label: "Monitor: markets, world events, cyber threats", run: () => go({ page: "Monitor" }) },
     { id: "logs", label: "Logs", run: () => go({ page: "Docs" }) },
     { id: "backup", label: "Backups and copies", run: () => go({ page: "Settings", params: { section: "data" } }) },
     { id: "network", label: "Open the lake to other devices", run: () => go({ page: "Settings", params: { section: "network" } }) },
@@ -254,6 +258,7 @@ function App() {
       </div>
       <Notices />
       <UpdateWatcher />
+      <AlertWatcher />
       {palette && <Palette commands={commands} onClose={() => setPalette(false)} />}
       {welcome && <Welcome onClose={closeWelcome} />}
     </NavContext.Provider>
